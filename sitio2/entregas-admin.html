@@ -1,0 +1,402 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguimiento de Entregas - Abasto Ya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #2C5F2D;
+            --secondary-color: #97BC62;
+            --background-color: #F4F1DE;
+            --text-color: #3E2723;
+            --white-color: #FFFFFF;
+            --error-color: #D32F2F;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 { margin: 0; font-size: 1.8rem; }
+        .header a { color: var(--white-color); text-decoration: none; font-weight: 600; }
+
+        .main-container { padding: 2rem; }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .table-container {
+            background-color: var(--white-color);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem 1.2rem; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f7f7f7; font-weight: 700; color: var(--primary-color); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #f1f1f1; }
+
+        .btn-details {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        .btn-details, .btn-incident {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            border: none;
+            cursor: pointer;
+            vertical-align: middle; /* Align them on the same line */
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .btn-details {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        .btn-details:hover { background-color: #7BA04F; }
+
+        .btn-incident {
+            background-color: #F9A03F; /* Naranja/amarillo */
+            color: white;
+            margin-left: 0.5rem;
+        }
+        .btn-incident:hover { background-color: #E08A2E; }
+        .btn-incident:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+        .modal-content { background-color: #fefefe; margin: auto; padding: 2rem 2.5rem; border-radius: 15px; width: 90%; max-width: 900px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+        .modal-header h2 { margin: 0; color: var(--primary-color); }
+        .close-button { color: #aaa; font-size: 2rem; font-weight: bold; cursor: pointer; }
+        .close-button:hover, .close-button:focus { color: black; }
+        
+        .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+        .detail-section { background-color: #f9f9f9; padding: 1.5rem; border-radius: 10px; }
+        .detail-section h3 { margin-top: 0; color: var(--primary-color); border-bottom: 2px solid var(--secondary-color); padding-bottom: 0.5rem; }
+        .detail-section p { margin: 0.8rem 0; }
+        .detail-section p strong { color: var(--text-color); display: block; font-weight: 600; }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Seguimiento de Entregas</h1>
+        <a href="dashboard-admin.html">Volver al Panel</a>
+    </header>
+
+    <main class="main-container">
+        <h2 class="section-title">Todas las Entregas</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Entrega</th>
+                        <th># Radicado</th>
+                        <th>Cliente</th>
+                        <th>Proveedor</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="deliveries-table-body">
+                    <!-- Filas de entregas -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal para Detalles -->
+    <div id="details-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Detalles Consolidados</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div id="modal-body">
+                <!-- Contenido del modal aquí -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const USERS_API_URL = 'http://192.168.100.2:3001/usuarios';
+        const CONTRATOS_API_URL = 'http://192.168.100.2:3003/contratos';
+        const PAGOS_API_URL = 'http://192.168.100.2:3004/pagos';
+        const ENTREGAS_API_URL = 'http://192.168.100.2:3005/entregas';
+        const PRODUCTS_API_URL = 'http://192.168.100.2:3002/productos';
+
+        const tableBody = document.getElementById('deliveries-table-body');
+        const modal = document.getElementById('details-modal');
+        const modalBody = document.getElementById('modal-body');
+        const closeModalBtn = modal.querySelector('.close-button');
+
+        let allUsers = [];
+        let allDeliveries = [];
+
+        const formatCurrency = (value) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+        const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+        const formatUnderscores = (text) => text ? text.replace(/_/g, ' ') : 'N/A';
+
+        const authenticatedFetch = async (url, options = {}) => {
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = 'login.html'; return; }
+            const headers = { 'Content-Type': 'application/json', ...options.headers, 'Authorization': `Bearer ${token}` };
+            const response = await fetch(url, { ...options, headers });
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    alert('Su sesión ha expirado o no tiene permisos.');
+                    window.location.href = 'login.html';
+                }
+                // Try to parse error message from backend
+                const errorData = await response.json().catch(() => ({ message: `Error ${response.status}` }));
+                throw new Error(errorData.message || `Error ${response.status}`);
+            }
+            return response.json();
+        };
+
+        const renderTable = (deliveries) => {
+            tableBody.innerHTML = '';
+            if (!deliveries || deliveries.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No se encontraron entregas.</td></tr>';
+                return;
+            }
+
+            const userMap = new Map(allUsers.map(user => [user.id, user.nombre]));
+
+            deliveries.forEach(delivery => {
+                const isFinalState = ['ENTREGADO', 'CANCELADO', 'INCIDENCIA'].includes(delivery.estado);
+                const row = `
+                    <tr>
+                        <td>${delivery.id}</td>
+                        <td>${delivery.contrato_id}</td>
+                        <td>${userMap.get(delivery.cliente_id) || 'N/A'}</td>
+                        <td>${userMap.get(delivery.proveedor_id) || 'N/A'}</td>
+                        <td>${formatUnderscores(delivery.estado)}</td>
+                        <td>
+                            <a href="#" class="btn-details" data-delivery-id="${delivery.id}">Ver Detalles</a>
+                            <button class="btn-incident" data-delivery-id="${delivery.id}" ${isFinalState ? 'disabled' : ''}>Reportar Incidencia</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        };
+
+        const reportIncident = async (deliveryId) => {
+            const password = prompt('Para reportar una incidencia, por favor ingrese su contraseña de administrador:');
+            if (!password) {
+                alert('La contraseña es requerida.');
+                return;
+            }
+
+            try {
+                await authenticatedFetch(`${ENTREGAS_API_URL}/${deliveryId}/estado`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ 
+                        estado: 'INCIDENCIA', 
+                        adminPassword: password 
+                    })
+                });
+                alert('Incidencia reportada con éxito.');
+                // Refresh data
+                allDeliveries = await authenticatedFetch(ENTREGAS_API_URL);
+                renderTable(allDeliveries);
+            } catch (error) {
+                alert(`Error al reportar incidencia: ${error.message}`);
+                console.error('Error reporting incident:', error);
+            }
+        };
+
+        const openDetailsModal = async (deliveryId) => {
+            modalBody.innerHTML = '<p style="text-align:center;">Cargando detalles...</p>';
+            modal.style.display = 'flex';
+
+            try {
+                // 1. Obtener detalles de la entrega
+                const delivery = await authenticatedFetch(`${ENTREGAS_API_URL}/${deliveryId}`);
+                const { contrato_id, orden_de_pago_id } = delivery;
+
+                // 2. Obtener detalles del contrato y pago en paralelo
+                let contract, paymentOrder;
+                try {
+                    [contract, paymentOrder] = await Promise.all([
+                        authenticatedFetch(`${CONTRATOS_API_URL}/traerContratoPorId/${contrato_id}`),
+                        authenticatedFetch(`${PAGOS_API_URL}/transaccionesPorOrden/${orden_de_pago_id}`)
+                    ]);
+                } catch (e) {
+                    throw new Error(`Failed during data fetching. Contract ID: ${contrato_id}, Payment Order ID: ${orden_de_pago_id}. Error: ${e.message}`);
+                }
+
+                const userMap = new Map(allUsers.map(user => [user.id, user.nombre]));
+
+                // 3. Construir el HTML del modal con todos los datos
+                let productsTableHTML = '<p>No hay productos en este contrato.</p>';
+                if (contract.productos && contract.productos.length > 0) {
+                    const productRows = await Promise.all(contract.productos.map(async (p) => {
+                        const productDetails = await authenticatedFetch(`${PRODUCTS_API_URL}/buscarPorId/${p.producto_id_original}`);
+                        const productName = productDetails ? productDetails.nombre : 'Producto no encontrado';
+                        const productUnit = productDetails ? productDetails.unidad : 'N/A';
+                        return `
+                            <tr>
+                                <td>${productName}</td>
+                                <td>${productUnit}</td>
+                                <td>${p.cantidad}</td>
+                                <td>${formatCurrency(p.precio_unitario)}</td>
+                                <td>${formatCurrency(p.sub_total)}</td>
+                            </tr>
+                        `;
+                    }));
+
+                    productsTableHTML = `
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Presentación</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio Unit.</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${productRows.join('')}</tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+
+                modalBody.innerHTML = `
+                    <div class="details-grid">
+                        <div class="detail-section">
+                            <h3>Detalles de Entrega</h3>
+                            <p><strong>ID Entrega:</strong> ${delivery.id}</p>
+                            <p><strong>Estado:</strong> ${formatUnderscores(delivery.estado)}</p>
+                            <p><strong>Dirección:</strong> ${delivery.direccion_entrega || 'N/A'}</p>
+                            <p><strong>Teléfono Contacto:</strong> ${delivery.telefono_contacto || 'N/A'}</p>
+                            <p><strong>Fecha Creación:</strong> ${formatDate(delivery.fecha_creacion)}</p>
+                            <p><strong>Fecha Estimada:</strong> ${formatDate(delivery.fecha_estimada_entrega)}</p>
+                            <p><strong>Fecha Entrega Real:</strong> ${formatDate(delivery.fecha_entrega_real)}</p>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Resumen del Contrato</h3>
+                            <p><strong># Radicado:</strong> ${contract.id}</p>
+                            <p><strong>Cliente:</strong> ${userMap.get(contract.cliente_id) || 'N/A'}</p>
+                            <p><strong>Proveedor:</strong> ${userMap.get(contract.proveedor_id) || 'N/A'}</p>
+                            <p><strong>Fecha Contrato:</strong> ${formatDate(contract.fecha_creacion)}</p>
+                            <p><strong>Monto Total Contrato:</strong> ${formatCurrency(contract.total)}</p>
+                            <p><strong>Estado Contrato:</strong> ${formatUnderscores(contract.estado)}</p>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Resumen de Pago</h3>
+                            <p><strong>ID Orden de Pago:</strong> ${paymentOrder.id}</p>
+                            <p><strong>Estado del Pago:</strong> ${formatUnderscores(paymentOrder.estado)}</p>
+                            <p><strong>Monto Total:</strong> ${formatCurrency(paymentOrder.monto_total)}</p>
+                            <p><strong>Saldo Pendiente:</strong> ${formatCurrency(paymentOrder.saldo_pendiente)}</p>
+                            <p><strong>Total Transacciones:</strong> ${paymentOrder.transacciones ? paymentOrder.transacciones.length : 0}</p>
+                        </div>
+                    </div>
+                    <div class="detail-section" style="margin-top: 2rem;">
+                        <h3>Productos del Contrato</h3>
+                        ${productsTableHTML}
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error fetching consolidated details:', error);
+                let debugInfo = `Error: ${error.message}.`;
+                try {
+                    // Try to fetch delivery details again just for debugging info
+                    const deliveryForDebug = await authenticatedFetch(`${ENTREGAS_API_URL}/${deliveryId}`);
+                    debugInfo += ` || IDs used -> Delivery: ${deliveryId}, Contract: ${deliveryForDebug.contrato_id}, Payment Order: ${deliveryForDebug.orden_de_pago_id}.`;
+                } catch (debugError) {
+                    debugInfo += ` || Failed to get debug info. Delivery ID was ${deliveryId}.`;
+                }
+                modalBody.innerHTML = `<p style="text-align:center; color:var(--error-color);">Error al cargar los detalles. ${debugInfo}</p>`;
+            }
+        };
+
+        tableBody.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-details')) {
+                e.preventDefault();
+                const deliveryId = e.target.dataset.deliveryId;
+                openDetailsModal(deliveryId);
+            } else if (e.target.classList.contains('btn-incident')) {
+                e.preventDefault();
+                const deliveryId = e.target.dataset.deliveryId;
+                reportIncident(deliveryId);
+            }
+        });
+
+        closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+        window.addEventListener('click', (e) => {
+            if (e.target == modal) modal.style.display = 'none';
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Step 1: Fetch all deliveries
+                allDeliveries = await authenticatedFetch(ENTREGAS_API_URL);
+
+                // Step 2: Get unique user IDs from deliveries (clients and providers)
+                const userIds = [...new Set([
+                    ...allDeliveries.map(d => d.cliente_id),
+                    ...allDeliveries.map(d => d.proveedor_id)
+                ].filter(id => id))];
+
+                // Step 3: Fetch only the required user profiles
+                if (userIds.length > 0) {
+                    allUsers = await Promise.all(
+                        userIds.map(id => authenticatedFetch(`${USERS_API_URL}/buscarUsuario/${id}`))
+                    );
+                } else {
+                    allUsers = [];
+                }
+
+                // Step 4: Render the table
+                renderTable(allDeliveries);
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--error-color);">Error al cargar los datos.</td></tr>`;
+            }
+        });
+
+    </script>
+
+</body>
+</html>

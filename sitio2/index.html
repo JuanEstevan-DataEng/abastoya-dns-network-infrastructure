@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abasto Ya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #2C5F2D; /* Verde oscuro, como un campo fértil */
+            --secondary-color: #97BC62; /* Verde claro, como brotes nuevos */
+            --accent-color: #F9A03F; /* Naranja/amarillo, como una cosecha de maíz */
+            --background-color: #F4F1DE; /* Un beige muy claro, como tierra seca o lino */
+            --text-color: #3E2723; /* Marrón oscuro, como tierra fértil */
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--text-color);
+            margin-top: 0.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1E421E; /* Un verde más oscuro */
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .btn-secondary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #E08A2E; /* Un naranja más oscuro */
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>ABASTO YA</h1>
+        <h2>Abastecimiento al precio justo!</h2>
+        <div class="button-container">
+            <a href="login.html" class="btn btn-primary">ACCEDER</a>
+            <a href="registro.html" class="btn btn-secondary">REGISTRARSE</a>
+        </div>
+    </div>
+
+</body>
+</html>

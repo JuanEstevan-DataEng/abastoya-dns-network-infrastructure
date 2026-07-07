@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Abasto Ya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #2C5F2D;
+            --secondary-color: #97BC62;
+            --background-color: #F4F1DE;
+            --text-color: #3E2723;
+            --white-color: #FFFFFF;
+            --error-color: #D32F2F;
+            --success-color: #28a745;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 { margin: 0; font-size: 1.8rem; }
+        .header a { color: var(--white-color); text-decoration: none; font-weight: 600; }
+
+        .main-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 3rem;
+            align-items: flex-start;
+        }
+
+        .profile-card {
+            background-color: var(--white-color);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .profile-picture {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            margin: 0 auto 1.5rem auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4rem;
+            color: var(--white-color);
+            font-weight: 700;
+        }
+
+        .profile-card h2 {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-color);
+        }
+
+        .profile-card p {
+            margin: 0;
+            color: #666;
+        }
+
+        .profile-details {
+            background-color: var(--white-color);
+            border-radius: 15px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full-width { grid-column: 1 / -1; }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-group input:disabled {
+            background-color: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .hidden { display: none; }
+
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        .message.error { background-color: var(--error-color); color: white; }
+        .message.success { background-color: var(--success-color); color: white; }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Mi Perfil</h1>
+        <a href="dashboard-proveedor.html">Volver al Panel</a>
+    </header>
+
+    <main class="main-container">
+        <aside class="profile-card">
+            <div class="profile-picture" id="profile-initial"></div>
+            <h2 id="profile-name">Cargando...</h2>
+            <p id="profile-username"></p>
+        </aside>
+
+        <section class="profile-details">
+            <h2 class="section-title">Mis Datos</h2>
+            <form id="profile-form">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="nombre">Nombre de la Empresa</label>
+                        <input type="text" id="nombre" name="nombre" disabled required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Correo Electrónico</label>
+                        <input type="email" id="email" name="email" disabled required>
+                    </div>
+                    <div class="form-group">
+                        <label for="telefono">Teléfono</label>
+                        <input type="tel" id="telefono" name="telefono" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="cedula_NIT">NIT</label>
+                        <input type="text" id="cedula_NIT" name="cedula_NIT" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="direccion">Dirección</label>
+                        <input type="text" id="direccion" name="direccion" disabled>
+                    </div>
+                </div>
+
+                <div id="password-section" class="hidden">
+                    <h3 class="section-title" style="margin-top: 2.5rem; font-size: 1.5rem;">Cambiar Contraseña</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="password">Nueva Contraseña</label>
+                            <input type="password" id="password" name="password">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">Confirmar Nueva Contraseña</label>
+                            <input type="password" id="confirm-password">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="form-message" class="message"></div>
+
+                <div class="button-container">
+                    <button type="button" id="edit-btn" class="btn btn-primary">Editar Datos</button>
+                    <button type="button" id="cancel-btn" class="btn btn-secondary hidden">Cancelar</button>
+                    <button type="submit" id="save-btn" class="btn btn-primary hidden">Guardar Cambios</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        const USUARIOS_API_URL = 'http://192.168.100.2:3001/usuarios';
+
+        // DOM Elements
+        const form = document.getElementById('profile-form');
+        const editBtn = document.getElementById('edit-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const passwordSection = document.getElementById('password-section');
+        const formMessage = document.getElementById('form-message');
+        const formInputs = form.querySelectorAll('input:not([type="password"])');
+
+        let currentUserData = {};
+
+        const authenticatedFetch = async (url, options = {}) => {
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = 'login.html'; return; }
+            const headers = { 'Content-Type': 'application/json', ...options.headers, 'Authorization': `Bearer ${token}` };
+            const response = await fetch(url, { ...options, headers });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                if (response.status === 401 || response.status === 403) {
+                    alert('Su sesión ha expirado o no tiene permisos.');
+                    window.location.href = 'login.html';
+                }
+                throw new Error(errorData.message || `Error ${response.status}`);
+            }
+            return response.json();
+        };
+
+        const populateForm = (user) => {
+            currentUserData = user;
+            document.getElementById('profile-initial').textContent = (user.nombre || '?').charAt(0).toUpperCase();
+            document.getElementById('profile-name').textContent = user.nombre;
+            document.getElementById('profile-username').textContent = `@${user.username}`;
+
+            formInputs.forEach(input => {
+                if (input.name in user) {
+                    input.value = user[input.name] || '';
+                }
+            });
+        };
+
+        const toggleEditMode = (isEditing) => {
+            formInputs.forEach(input => input.disabled = !isEditing);
+            passwordSection.classList.toggle('hidden', !isEditing);
+            
+            editBtn.classList.toggle('hidden', isEditing);
+            saveBtn.classList.toggle('hidden', !isEditing);
+            cancelBtn.classList.toggle('hidden', !isEditing);
+
+            formMessage.style.display = 'none';
+            document.getElementById('password').value = '';
+            document.getElementById('confirm-password').value = '';
+        };
+
+        const fetchProfileData = async () => {
+            try {
+                const tokenPayload = JSON.parse(atob(localStorage.getItem('token').split('.')[1]));
+                const userId = tokenPayload.id;
+                const user = await authenticatedFetch(`${USUARIOS_API_URL}/buscarUsuario/${userId}`);
+                populateForm(user);
+            } catch (error) {
+                formMessage.textContent = `Error al cargar el perfil: ${error.message}`;
+                formMessage.className = 'message error';
+                formMessage.style.display = 'block';
+            }
+        };
+
+        editBtn.addEventListener('click', () => toggleEditMode(true));
+        cancelBtn.addEventListener('click', () => {
+            populateForm(currentUserData); // Restore original data
+            toggleEditMode(false);
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            formMessage.style.display = 'none';
+
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const dataToUpdate = {};
+
+            // 1. Check for password mismatch
+            if (password || confirmPassword) {
+                if (password !== confirmPassword) {
+                    formMessage.textContent = 'Las contraseñas no coinciden.';
+                    formMessage.className = 'message error';
+                    formMessage.style.display = 'block';
+                    return;
+                }
+                if(password) dataToUpdate.password = password;
+            }
+
+            // 2. Collect changed data
+            formInputs.forEach(input => {
+                if (input.value !== (currentUserData[input.name] || '')) {
+                    dataToUpdate[input.name] = input.value;
+                }
+            });
+
+            // 3. Check if there's anything to update
+            if (Object.keys(dataToUpdate).length === 0) {
+                formMessage.textContent = 'No se han realizado cambios.';
+                formMessage.className = 'message'; // Neutral color
+                formMessage.style.display = 'block';
+                return;
+            }
+
+            // 4. Send update request
+            try {
+                await authenticatedFetch(`${USUARIOS_API_URL}/actualizar/${currentUserData.id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(dataToUpdate)
+                });
+                formMessage.textContent = '¡Perfil actualizado con éxito!';
+                formMessage.className = 'message success';
+                formMessage.style.display = 'block';
+                await fetchProfileData(); // Refresh data
+                toggleEditMode(false);
+            } catch (error) {
+                formMessage.textContent = `Error al actualizar: ${error.message}`;
+                formMessage.className = 'message error';
+                formMessage.style.display = 'block';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', fetchProfileData);
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Productos - Abasto Ya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #2C5F2D;
+            --secondary-color: #97BC62;
+            --accent-color: #F9A03F;
+            --background-color: #F4F1DE;
+            --text-color: #3E2723;
+            --white-color: #FFFFFF;
+            --error-color: #D32F2F;
+            --revision-bg-color: #FFF3CD;
+            --revision-text-color: #856404;
+            --revision-border-color: #FFC107;
+            --success-color: #28a745;
+            --success-bg-color: #d4edda;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 { margin: 0; font-size: 1.8rem; }
+        .header a { color: var(--white-color); text-decoration: none; font-weight: 600; }
+
+        .main-container { padding: 2rem; }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .toolbar .filters {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .toolbar input, .toolbar select {
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .toolbar input {
+            width: 300px;
+        }
+
+        .toolbar select {
+            width: 250px;
+        }
+
+        .btn, .btn-primary, .btn-review-price, .btn-toggle-status {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            border: none;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+        }
+        .btn-primary:hover { background-color: #1A4314; }
+
+        .actions-cell button {
+            margin-right: 0.5rem;
+        }
+
+        .btn-review-price {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        .btn-review-price:hover { background-color: #e08e45; }
+
+        .btn-toggle-status {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-toggle-status:hover { background-color: #5a6268; }
+        .btn-toggle-status:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .table-container {
+            background-color: var(--white-color);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem 1.2rem; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f7f7f7; font-weight: 700; color: var(--primary-color); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #f1f1f1; }
+
+        .status-revision {
+            background-color: var(--revision-bg-color);
+            color: var(--revision-text-color);
+            font-weight: 700;
+            text-align: center;
+            border-left: 5px solid var(--revision-border-color);
+        }
+
+        .status-inactive {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem 0;
+            margin-top: 1.5rem;
+        }
+
+        .pagination-btn {
+            background-color: var(--white-color);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            margin: 0 0.3rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .pagination-btn:hover, .pagination-btn.active {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 2rem 2.5rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .close-button {
+            color: #aaa;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover, .close-button:focus {
+            color: black;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        
+        .form-group input[disabled] {
+            background-color: #e9ecef;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .price-range-info {
+            font-size: 0.9rem;
+            color: #555;
+            margin-top: 0.5rem;
+            background-color: #f8f9fa;
+            padding: 0.5rem;
+            border-radius: 5px;
+        }
+
+        .price-validation-message {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            padding: 0.8rem;
+            border-radius: 5px;
+            display: none; /* Oculto por defecto */
+            font-weight: 600;
+        }
+
+        .price-validation-message.valid {
+            color: var(--success-color);
+            background-color: var(--success-bg-color);
+            display: block;
+        }
+
+        .price-validation-message.invalid {
+            color: var(--error-color);
+            background-color: #f8d7da;
+            display: block;
+        }
+
+        .modal-error-message {
+            color: var(--error-color);
+            background-color: #F8D7DA;
+            border: 1px solid #F5C6CB;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none; /* Oculto por defecto */
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Gestión de Mis Productos</h1>
+        <a href="dashboard-proveedor.html">Volver al Panel</a>
+    </header>
+
+    <main class="main-container">
+        <h2 class="section-title">Mis Ofertas Publicadas</h2>
+        <div class="toolbar">
+            <div class="filters">
+                <input type="text" id="search-input" placeholder="Buscar en Mis Productos...">
+                <select id="category-filter">
+                    <option value="">Todas las categorías</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" id="add-offer-btn">+ Añadir Nueva Oferta</button>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre del Producto</th>
+                        <th>Unidad</th>
+                        <th>Precio Oferta</th>
+                        <th>Precio Unitario</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="products-table-body">
+                    <!-- Las filas de productos se insertarán aquí -->
+                </tbody>
+            </table>
+        </div>
+        <div id="pagination-container" class="pagination-container"></div>
+    </main>
+
+    <!-- Modal para Añadir Nueva Oferta -->
+    <div id="add-offer-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Añadir Nueva Oferta</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <form id="add-offer-form">
+                <div class="form-group">
+                    <label for="modal-category-filter">Filtrar por Categoría</label>
+                    <select id="modal-category-filter">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="product-select">Seleccionar Producto del Boletín</label>
+                    <select id="product-select" required>
+                        <option value="">-- Elija un producto --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="offer-price">Mi Precio de Oferta (por unidad de presentación)</label>
+                    <input type="number" id="offer-price" step="0.01" required>
+                    <div id="price-range-info" class="price-range-info" style="display: none;"></div>
+                    <div id="real-time-price-validation" class="price-validation-message"></div>
+                </div>
+                <div id="modal-error-message" class="modal-error-message"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Guardar Oferta</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Actualizar Precio -->
+    <div id="price-update-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Cambiar Precio de Oferta</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <form id="price-update-form">
+                <input type="hidden" id="update-offer-id">
+                <div class="form-group">
+                    <label>Producto</label>
+                    <input type="text" id="update-product-name" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="update-offer-price">Nuevo Precio de Oferta</label>
+                    <input type="number" id="update-offer-price" step="0.01" required>
+                    <div id="update-price-range-info" class="price-range-info" style="display: none;"></div>
+                    <div id="update-real-time-price-validation" class="price-validation-message"></div>
+                </div>
+                <div id="update-modal-error-message" class="modal-error-message"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Guardar Nuevo Precio</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const PRODUCTS_API_URL = 'http://192.168.100.2:3002/productos';
+
+        // --- DOM Elements ---
+        const tableBody = document.getElementById('products-table-body');
+        const searchInput = document.getElementById('search-input');
+        const categoryFilter = document.getElementById('category-filter');
+        const paginationContainer = document.getElementById('pagination-container');
+        
+        // Add Modal
+        const addOfferBtn = document.getElementById('add-offer-btn');
+        const addOfferModal = document.getElementById('add-offer-modal');
+        const addModalCloseBtn = addOfferModal.querySelector('.close-button');
+        const addOfferForm = document.getElementById('add-offer-form');
+        const modalCategoryFilter = document.getElementById('modal-category-filter');
+        const productSelect = document.getElementById('product-select');
+        const offerPriceInput = document.getElementById('offer-price');
+        const priceRangeInfo = document.getElementById('price-range-info');
+        const modalErrorMessage = document.getElementById('modal-error-message');
+        const realTimePriceValidation = document.getElementById('real-time-price-validation');
+
+        // Price Update Modal
+        const priceUpdateModal = document.getElementById('price-update-modal');
+        const priceUpdateModalCloseBtn = priceUpdateModal.querySelector('.close-button');
+        const priceUpdateForm = document.getElementById('price-update-form');
+        const updateOfferIdInput = document.getElementById('update-offer-id');
+        const updateProductNameInput = document.getElementById('update-product-name');
+        const updateOfferPriceInput = document.getElementById('update-offer-price');
+        const updatePriceRangeInfo = document.getElementById('update-price-range-info');
+        const updateRealTimePriceValidation = document.getElementById('update-real-time-price-validation');
+        const updateModalErrorMessage = document.getElementById('update-modal-error-message');
+
+        let allProviderProducts = [];
+        let bulletinProducts = [];
+        let currentPage = 1;
+        const rowsPerPage = 10;
+
+        // --- Helper Functions ---
+        const formatCurrency = (value) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+        const formatUnderscores = (text) => text ? text.replace(/_/g, ' ') : 'N/A';
+
+        const authenticatedFetch = async (url, options = {}) => {
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = 'login.html'; return; }
+            const headers = { 'Content-Type': 'application/json', ...options.headers, 'Authorization': `Bearer ${token}` };
+            const response = await fetch(url, { ...options, headers });
+            
+            if (!response.ok) {
+                console.error('Authenticated fetch failed. Status:', response.status);
+                const responseText = await response.text();
+                console.error('Response body:', responseText);
+
+                let errorData = { message: `Error ${response.status}: ${response.statusText}` };
+                try {
+                    errorData = { ...errorData, ...JSON.parse(responseText) };
+                } catch (e) {}
+
+                if (response.status === 401 || response.status === 403) {
+                    alert('Su sesión ha expirado o no tiene permisos.');
+                    window.location.href = 'login.html';
+                    throw new Error('Unauthorized');
+                }
+                const finalErrorMessage = errorData.message || errorData.error || `Error ${response.status}: ${response.statusText}`;
+                throw new Error(finalErrorMessage);
+            }
+            return response;
+        };
+
+        const renderTable = (products) => {
+            tableBody.innerHTML = '';
+            if (products.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No se encontraron ofertas con los filtros actuales.</td></tr>';
+                return;
+            }
+
+            products.forEach(product => {
+                let statusClass = '';
+                let statusText = formatUnderscores(product.estado);
+                if (product.estado === 'REQUIERE_REVISION') statusClass = 'status-revision';
+                else if (product.estado === 'INACTIVO') statusClass = 'status-inactive';
+
+                const toggleButtonDisabled = product.estado === 'REQUIERE_REVISION';
+                const toggleButtonText = product.estado === 'INACTIVO' ? 'Activar' : 'Desactivar';
+
+                const row = `
+                    <tr>
+                        <td>${formatUnderscores(product.nombre)}</td>
+                        <td>${formatUnderscores(product.unidad)}</td>
+                        <td>${formatCurrency(product.precio)}</td>
+                        <td>${formatCurrency(product.precio_unitario)}</td>
+                        <td class="${statusClass}">${statusText}</td>
+                        <td class="actions-cell">
+                            <button class="btn btn-review-price" data-id="${product.id}">Cambiar Precio</button>
+                            <button class="btn btn-toggle-status" data-id="${product.id}" data-status="${product.estado}" ${toggleButtonDisabled ? 'disabled' : ''}>${toggleButtonText}</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        };
+
+        const renderPagination = (totalItems) => {
+            paginationContainer.innerHTML = '';
+            const totalPages = Math.ceil(totalItems / rowsPerPage);
+            if (totalPages <= 1) return;
+
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = '&laquo; Anterior';
+            prevButton.className = 'pagination-btn';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => { if (currentPage > 1) { currentPage--; applyFiltersAndPagination(); } });
+            paginationContainer.appendChild(prevButton);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.innerText = i;
+                pageButton.className = 'pagination-btn';
+                if (i === currentPage) pageButton.classList.add('active');
+                pageButton.addEventListener('click', () => { currentPage = i; applyFiltersAndPagination(); });
+                paginationContainer.appendChild(pageButton);
+            }
+
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = 'Siguiente &raquo;';
+            nextButton.className = 'pagination-btn';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; applyFiltersAndPagination(); } });
+            paginationContainer.appendChild(nextButton);
+        };
+
+        const populateCategoryFilter = async (filterElement, products) => {
+            const categories = new Set(products.map(p => p.categoria));
+            filterElement.innerHTML = '<option value="">Todas las categorías</option>';
+            [...categories].sort().forEach(category => {
+                filterElement.innerHTML += `<option value="${category}">${formatUnderscores(category)}</option>`;
+            });
+        };
+
+        const applyFiltersAndPagination = async () => {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const selectedCategoryValue = categoryFilter.value;
+            let filteredProducts = allProviderProducts;
+
+            if (searchTerm) {
+                filteredProducts = filteredProducts.filter(p => p.nombre.toLowerCase().includes(searchTerm));
+            }
+
+            if (selectedCategoryValue) {
+                const productMap = new Map(bulletinProducts.map(p => [p.id, p.categoria]));
+                filteredProducts = filteredProducts.filter(offer => {
+                    const category = productMap.get(offer.producto_coroabasto_id);
+                    return category === selectedCategoryValue;
+                });
+            }
+
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const paginatedProducts = filteredProducts.slice(startIndex, startIndex + rowsPerPage);
+            renderTable(paginatedProducts);
+            renderPagination(filteredProducts.length);
+        };
+
+        // --- Add Offer Modal Logic ---
+        const validatePriceRealTime = (priceInput, validationElement, baseProduct) => {
+            const offerPrice = parseFloat(priceInput.value);
+            if (!baseProduct || isNaN(offerPrice) || offerPrice <= 0) {
+                validationElement.style.display = 'none';
+                return;
+            }
+            const minPrice = baseProduct.precio_con_calidad_primera * 0.85;
+            const maxPrice = baseProduct.precio_con_calidad_extra * 1.15;
+            if (offerPrice >= minPrice && offerPrice <= maxPrice) {
+                validationElement.textContent = 'El precio está dentro del rango permitido.';
+                validationElement.className = 'price-validation-message valid';
+            } else {
+                validationElement.textContent = 'El precio está fuera del rango sugerido.';
+                validationElement.className = 'price-validation-message invalid';
+            }
+        };
+
+        const openAddOfferModal = async () => {
+            addOfferForm.reset();
+            modalErrorMessage.style.display = 'none';
+            priceRangeInfo.style.display = 'none';
+            realTimePriceValidation.style.display = 'none';
+            populateCategoryFilter(modalCategoryFilter, bulletinProducts);
+            populateModalProductList();
+            addOfferModal.style.display = 'flex';
+        };
+
+        const populateModalProductList = (category = '') => {
+            productSelect.innerHTML = '<option value="">-- Elija un producto --</option>';
+            let productsToDisplay = bulletinProducts;
+            if (category) {
+                productsToDisplay = productsToDisplay.filter(p => p.categoria === category);
+            }
+            productsToDisplay.forEach(p => {
+                productSelect.innerHTML += `<option value="${p.id}">${formatUnderscores(p.nombre)} (${formatUnderscores(p.presentacion)})</option>`;
+            });
+            priceRangeInfo.style.display = 'none';
+            realTimePriceValidation.style.display = 'none';
+        };
+
+        const showPriceRange = () => {
+            const selectedProductId = productSelect.value;
+            const product = bulletinProducts.find(p => p.id == selectedProductId);
+            if (!product) {
+                priceRangeInfo.style.display = 'none';
+                realTimePriceValidation.style.display = 'none';
+                return;
+            }
+            const minPrice = product.precio_con_calidad_primera * 0.85;
+            const maxPrice = product.precio_con_calidad_extra * 1.15;
+            priceRangeInfo.innerHTML = `Rango de precio sugerido: <strong>${formatCurrency(minPrice)}</strong> - <strong>${formatCurrency(maxPrice)}</strong>`;
+            priceRangeInfo.style.display = 'block';
+            validatePriceRealTime(offerPriceInput, realTimePriceValidation, product);
+        };
+
+        addOfferBtn.addEventListener('click', openAddOfferModal);
+        addModalCloseBtn.addEventListener('click', () => addOfferModal.style.display = 'none');
+        modalCategoryFilter.addEventListener('change', () => populateModalProductList(modalCategoryFilter.value));
+        productSelect.addEventListener('change', showPriceRange);
+        offerPriceInput.addEventListener('input', () => {
+            const product = bulletinProducts.find(p => p.id == productSelect.value);
+            validatePriceRealTime(offerPriceInput, realTimePriceValidation, product);
+        });
+
+        addOfferForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            modalErrorMessage.style.display = 'none';
+            const dataToSend = { producto_coroabasto_id: productSelect.value, precio: parseFloat(offerPriceInput.value) };
+            if (!dataToSend.producto_coroabasto_id || isNaN(dataToSend.precio)) {
+                modalErrorMessage.textContent = 'Por favor, seleccione un producto e ingrese un precio válido.';
+                modalErrorMessage.style.display = 'block';
+                return;
+            }
+            try {
+                await authenticatedFetch(`${PRODUCTS_API_URL}/proveedorCrearProducto`, { method: 'POST', body: JSON.stringify(dataToSend) });
+                alert('¡Oferta creada con éxito!');
+                addOfferModal.style.display = 'none';
+                await fetchInitialData();
+            } catch (error) {
+                modalErrorMessage.textContent = error.message.includes('Rango permitido') ? error.message : 'Error al crear la oferta.';
+                modalErrorMessage.style.display = 'block';
+            }
+        });
+
+        // --- Price Update Modal and Status Toggle Logic ---
+        const openPriceUpdateModal = (product) => {
+            priceUpdateForm.reset();
+            updateModalErrorMessage.style.display = 'none';
+            updatePriceRangeInfo.style.display = 'none';
+            updateRealTimePriceValidation.style.display = 'none';
+
+            const baseProduct = bulletinProducts.find(p => p.id == product.producto_coroabasto_id);
+
+            updateOfferIdInput.value = product.id;
+            updateProductNameInput.value = formatUnderscores(product.nombre);
+            updateOfferPriceInput.value = product.precio;
+
+            if (baseProduct) {
+                const minPrice = baseProduct.precio_con_calidad_primera * 0.85;
+                const maxPrice = baseProduct.precio_con_calidad_extra * 1.15;
+                updatePriceRangeInfo.innerHTML = `Rango sugerido: <strong>${formatCurrency(minPrice)}</strong> - <strong>${formatCurrency(maxPrice)}</strong>`;
+                updatePriceRangeInfo.style.display = 'block';
+                validatePriceRealTime(updateOfferPriceInput, updateRealTimePriceValidation, baseProduct);
+            }
+            
+            priceUpdateModal.style.display = 'flex';
+        };
+
+        const toggleProductStatus = async (offerId, currentStatus) => {
+            const newStatus = currentStatus === 'INACTIVO' ? 'ACTIVO' : 'INACTIVO';
+            const actionText = newStatus === 'ACTIVO' ? 'activar' : 'desactivar';
+
+            if (!confirm(`¿Está seguro de que desea ${actionText} esta oferta?`)) {
+                return;
+            }
+
+            try {
+                await authenticatedFetch(`${PRODUCTS_API_URL}/actualizarMiProducto/${offerId}/estado`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ estado: newStatus })
+                });
+                alert(`Oferta ${actionText}da con éxito.`);
+                await fetchInitialData();
+            } catch (error) {
+                alert(`Error al ${actionText} la oferta: ${error.message}`);
+            }
+        };
+
+        updateOfferPriceInput.addEventListener('input', () => {
+            const offerId = updateOfferIdInput.value;
+            const product = allProviderProducts.find(p => p.id == offerId);
+            if(product) {
+                const baseProduct = bulletinProducts.find(p => p.id == product.producto_coroabasto_id);
+                validatePriceRealTime(updateOfferPriceInput, updateRealTimePriceValidation, baseProduct);
+            }
+        });
+
+        priceUpdateForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            updateModalErrorMessage.style.display = 'none';
+            const offerId = updateOfferIdInput.value;
+            const originalProduct = allProviderProducts.find(p => p.id == offerId);
+            const newPrice = parseFloat(updateOfferPriceInput.value);
+
+            if (Math.abs(newPrice - originalProduct.precio) < 0.01) {
+                updateModalErrorMessage.textContent = 'El precio ingresado es el mismo que el actual.';
+                updateModalErrorMessage.style.display = 'block';
+                return;
+            }
+
+            try {
+                await authenticatedFetch(`${PRODUCTS_API_URL}/proveedorupdate/${offerId}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ precio: newPrice })
+                });
+                alert('¡Precio actualizado con éxito! El producto ha sido reactivado.');
+                priceUpdateModal.style.display = 'none';
+                await fetchInitialData();
+            } catch (error) {
+                updateModalErrorMessage.textContent = error.message;
+                updateModalErrorMessage.style.display = 'block';
+            }
+        });
+
+        tableBody.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-review-price')) {
+                const productId = e.target.dataset.id;
+                const productToReview = allProviderProducts.find(p => p.id == productId);
+                if (productToReview) openPriceUpdateModal(productToReview);
+            }
+            if (e.target.classList.contains('btn-toggle-status')) {
+                const productId = e.target.dataset.id;
+                const status = e.target.dataset.status;
+                toggleProductStatus(productId, status);
+            }
+        });
+
+        priceUpdateModalCloseBtn.addEventListener('click', () => priceUpdateModal.style.display = 'none');
+        window.addEventListener('click', (e) => {
+            if (e.target == addOfferModal) addOfferModal.style.display = 'none';
+            if (e.target == priceUpdateModal) priceUpdateModal.style.display = 'none';
+        });
+
+        // --- Initial Page Load ---
+        const fetchInitialData = async () => {
+            try {
+                const [productsResponse, bulletinResponse] = await Promise.all([
+                    authenticatedFetch(`${PRODUCTS_API_URL}/proveedorMisProductos`),
+                    authenticatedFetch(`${PRODUCTS_API_URL}/traerProductosCoroabasto`)
+                ]);
+                
+                allProviderProducts = await productsResponse.json();
+                bulletinProducts = await bulletinResponse.json();
+                
+                const productMap = new Map(bulletinProducts.map(p => [p.id, p.categoria]));
+                const mainCategories = new Set();
+                allProviderProducts.forEach(offer => {
+                    const category = productMap.get(offer.producto_coroabasto_id);
+                    if (category) mainCategories.add(category);
+                });
+                
+                populateCategoryFilter(categoryFilter, bulletinProducts);
+                applyFiltersAndPagination();
+
+            } catch (error) {
+                console.error('Error al cargar la página:', error);
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--error-color);">Error al cargar datos: ${error.message}</td></tr>`;
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = JSON.parse(localStorage.getItem('usuario'));
+            if (!currentUser || currentUser.tipo !== 'PROVEEDOR') {
+                window.location.href = 'login.html';
+                return;
+            }
+            fetchInitialData();
+        });
+
+        searchInput.addEventListener('input', () => { currentPage = 1; applyFiltersAndPagination(); });
+        categoryFilter.addEventListener('change', () => { currentPage = 1; applyFiltersAndPagination(); });
+
+    </script>
+
+</body>
+</html>

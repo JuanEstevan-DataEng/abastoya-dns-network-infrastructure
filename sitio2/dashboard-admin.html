@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administrador - Abasto Ya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #2C5F2D; /* Verde oscuro */
+            --secondary-color: #97BC62; /* Verde claro */
+            --accent-color: #F9A03F; /* Naranja/amarillo */
+            --background-color: #F4F1DE; /* Beige claro */
+            --text-color: #3E2723; /* Marrón oscuro */
+            --stat-color-1: #457B9D;
+            --stat-color-2: #83C5BE;
+            --stat-color-3: #F4A261;
+            --stat-color-4: #E9C46A;
+            --stat-color-5: #A8DADC;
+            --stat-color-6: #B5E48C;
+            --pending-color-1: #E63946; /* Rojo Fuerte */
+            --pending-color-2: #2A9D8F; /* Teal */
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .header .user-info {
+            font-weight: 600;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column; 
+            justify-content: flex-start; 
+            align-items: center;
+            min-height: calc(100vh - 70px); 
+            padding: 2rem;
+        }
+
+        .dashboard-menu {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr); /* 6 columnas para el layout */
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 3rem;
+        }
+
+        .menu-button {
+            background-color: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 15px;
+            padding: 2rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            display: flex; /* Para centrar contenido verticalmente */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .menu-button:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(44, 95, 45, 0.3);
+        }
+
+        /* Clases para el tamaño de los botones */
+        .menu-button.large {
+            grid-column: span 3; /* Ocupa 3 de 6 columnas */
+            font-size: 1.8rem; /* Texto más grande */
+            padding: 2.5rem; /* Más padding */
+        }
+
+        .menu-button.small {
+            grid-column: span 2; /* Ocupa 2 de 6 columnas */
+        }
+
+        .stats-section, .pending-section {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 3rem;
+        }
+
+        .stats-section h2, .pending-section h2 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            border-left: 7px solid var(--primary-color);
+        }
+        
+        .stat-card:nth-child(1) { border-color: var(--stat-color-1); }
+        .stat-card:nth-child(2) { border-color: var(--stat-color-2); }
+        .stat-card:nth-child(3) { border-color: var(--stat-color-3); }
+        .stat-card:nth-child(4) { border-color: var(--stat-color-4); }
+        .stat-card:nth-child(5) { border-color: var(--stat-color-5); }
+        .stat-card:nth-child(6) { border-color: var(--stat-color-6); }
+
+        .stat-card h3 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .stat-card:nth-child(1) h3 { color: var(--stat-color-1); }
+        .stat-card:nth-child(2) h3 { color: var(--stat-color-2); }
+        .stat-card:nth-child(3) h3 { color: var(--stat-color-3); }
+        .stat-card:nth-child(4) h3 { color: var(--stat-color-4); }
+        .stat-card:nth-child(5) h3 { color: var(--stat-color-5); }
+        .stat-card:nth-child(6) h3 { color: var(--stat-color-6); }
+
+        .stat-card .count {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .pending-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .pending-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+            border-left: 7px solid;
+        }
+
+        .pending-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+        }
+        
+        .pending-card:nth-child(1) { border-color: var(--pending-color-1); }
+        .pending-card:nth-child(2) { border-color: var(--pending-color-2); }
+
+        .pending-card h3 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .pending-card:nth-child(1) h3 { color: var(--pending-color-1); }
+        .pending-card:nth-child(2) h3 { color: var(--pending-color-2); }
+
+        .pending-card .count {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .pending-card a {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        .pending-card:nth-child(1) a { background-color: var(--pending-color-1); }
+        .pending-card:nth-child(2) a { background-color: var(--pending-color-2); }
+
+        .pending-card a:hover {
+            background-color: #7BA04F;
+        }
+        
+        .pending-card:nth-child(1) a:hover { background-color: #C22B37; }
+        .pending-card:nth-child(2) a:hover { background-color: #228074; }
+
+        .logout-button {
+            background-color: #D32F2F; /* Rojo */
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .logout-button:hover {
+            background-color: #B71C1C;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Panel de Administrador</h1>
+        <div class="user-info">
+            <span id="admin-username"></span>
+            <button class="logout-button" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="dashboard-menu">
+            <a href="usuarios-admin.html" class="menu-button large">Gestión de Usuarios</a>
+            <a href="productos-admin.html" class="menu-button large">Gestión de Productos</a>
+            <a href="contratos-admin.html" class="menu-button small">Gestión de Contratos</a>
+            <a href="pagos-admin.html" class="menu-button small">Gestión de Pagos</a>
+            <a href="entregas-admin.html" class="menu-button small">Seguimiento de Entregas</a>
+        </div>
+
+        <section class="pending-section">
+            <h2>Peticiones Pendientes</h2>
+            <div class="pending-cards">
+                <div class="pending-card">
+                    <h3>Usuarios por Aprobar</h3>
+                    <p class="count" id="pending-users-count">0</p>
+                    <a href="pendientes-admin.html#users">Gestionar Usuarios</a>
+                </div>
+                <div class="pending-card">
+                    <h3>Contratos por Aprobar</h3>
+                    <p class="count" id="pending-contracts-count">0</p>
+                    <a href="pendientes-admin.html#contracts">Gestionar Contratos</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-section">
+            <h2>Estadísticas Generales</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Usuarios Activos</h3>
+                    <p class="count" id="active-users-count">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Productos (Boletín)</h3>
+                    <p class="count" id="active-products-count">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Ofertas Publicadas</h3>
+                    <p class="count" id="published-offers-count">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Contratos Aprobados</h3>
+                    <p class="count" id="approved-contracts-count">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Pagos Pendientes</h3>
+                    <p class="count" id="pending-payments-count">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Entregas en Curso</h3>
+                    <p class="count" id="ongoing-deliveries-count">0</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const USERS_API_URL = 'http://192.168.100.2:3001/usuarios';
+        const PRODUCTS_API_URL = 'http://192.168.100.2:3002/productos';
+        const CONTRATOS_API_URL = 'http://192.168.100.2:3003/contratos';
+        const PAGOS_API_URL = 'http://192.168.100.2:3004/pagos';
+        const ENTREGAS_API_URL = 'http://192.168.100.2:3005/entregas';
+
+        // Helper para fetch autenticado
+        const authenticatedFetch = async (url, options = {}) => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            const headers = { ...options.headers, 'Authorization': `Bearer ${token}` };
+            const response = await fetch(url, { ...options, headers });
+
+            if (!response.ok) {
+                let errorData = { message: `Error ${response.status}: ${response.statusText}` };
+                try {
+                    const jsonResponse = await response.json();
+                    errorData = { ...errorData, ...jsonResponse };
+                } catch (e) {
+                    // No se pudo parsear el JSON, usar el mensaje por defecto
+                }
+
+                if (response.status === 401 || response.status === 403) {
+                    alert('Su sesión ha expirado o no tiene permisos. Por favor, inicie sesión de nuevo.');
+                    window.location.href = 'login.html';
+                    throw new Error('Unauthorized');
+                }
+                const finalErrorMessage = errorData.message || errorData.error || `Error ${response.status}: ${response.statusText}`;
+                throw new Error(finalErrorMessage);
+            }
+            return response.json(); // Devuelve el JSON directamente
+        };
+
+        const updateStatCard = (elementId, value) => {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value;
+            } else {
+                console.warn(`Element with ID ${elementId} not found.`);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const adminUser = JSON.parse(localStorage.getItem('usuario'));
+            if (adminUser && adminUser.username) {
+                document.getElementById('admin-username').textContent = `Bienvenido, ${adminUser.username}`;
+            } else {
+                 document.getElementById('admin-username').textContent = 'Bienvenido, Admin';
+            }
+
+            // Fetch all data in parallel
+            try {
+                const results = await Promise.all([
+                    authenticatedFetch(`${USERS_API_URL}/verUsuarios`).catch(e => { console.error('Failed to fetch users:', e); return []; }),
+                    authenticatedFetch(`${PRODUCTS_API_URL}/traerProductosCoroabasto`).catch(e => { console.error('Failed to fetch bulletin products:', e); return []; }),
+                    authenticatedFetch(`${PRODUCTS_API_URL}/traerTodos`).catch(e => { console.error('Failed to fetch all products/offers:', e); return []; }),
+                    authenticatedFetch(`${CONTRATOS_API_URL}/traerTodosLosContratos`).catch(e => { console.error('Failed to fetch contracts:', e); return []; }),
+                    authenticatedFetch(`${PAGOS_API_URL}/mostrarOrdenes`).catch(e => { console.error('Failed to fetch payment orders:', e); return []; }),
+                    authenticatedFetch(ENTREGAS_API_URL).catch(e => { console.error('Failed to fetch deliveries:', e); return []; })
+                ]);
+
+                const [
+                    allUsers, 
+                    bulletinProducts, 
+                    providerOffers, 
+                    allContracts, 
+                    paymentOrders, 
+                    allDeliveries
+                ] = results;
+
+                // --- Calculate and Display Pending Requests ---
+                const pendingUsers = allUsers.filter(user => user.estado === 'EN_APROBACION');
+                updateStatCard('pending-users-count', pendingUsers.length);
+
+                const pendingContracts = allContracts.filter(contract => contract.estado === 'EN_APROBACION');
+                updateStatCard('pending-contracts-count', pendingContracts.length);
+
+                // --- Calculate and Display General Stats ---
+                const activeUsers = allUsers.filter(user => user.estado === 'ACTIVO');
+                updateStatCard('active-users-count', activeUsers.length);
+
+                updateStatCard('active-products-count', bulletinProducts.length);
+                updateStatCard('published-offers-count', providerOffers.length);
+
+                const approvedContracts = allContracts.filter(c => c.estado === 'APROBADO');
+                updateStatCard('approved-contracts-count', approvedContracts.length);
+
+                const pendingPayments = paymentOrders.filter(p => p.estado === 'PENDIENTE');
+                updateStatCard('pending-payments-count', pendingPayments.length);
+
+                const ongoingDeliveries = allDeliveries.filter(d => d.estado !== 'CANCELADO' && d.estado !== 'INCIDENCIA');
+                updateStatCard('ongoing-deliveries-count', ongoingDeliveries.length);
+
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+                // Optionally display a global error message on the dashboard
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('usuario');
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+    </script>
+
+</body>
+</html>

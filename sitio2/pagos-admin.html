@@ -1,0 +1,490 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Pagos - Abasto Ya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #2C5F2D; /* Verde oscuro */
+            --secondary-color: #97BC62; /* Verde claro */
+            --background-color: #F4F1DE; /* Beige claro */
+            --text-color: #3E2723; /* Marrón oscuro */
+            --white-color: #FFFFFF;
+            --error-color: #D32F2F;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .header a {
+            color: var(--white-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.3s;
+        }
+
+        .header a:hover {
+            opacity: 0.8;
+        }
+
+        .main-container {
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .table-container {
+            background-color: var(--white-color);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f7f7f7;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .actions-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            border: none;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+
+        .actions-btn:hover {
+            background-color: #7BA04F;
+        }
+        
+        .cancel-btn {
+            background-color: var(--error-color);
+        }
+        .cancel-btn:hover {
+            background-color: #B71C1C;
+        }
+        .cancel-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Estilos para el Modal */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 2rem 2.5rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .close-button {
+            color: #aaa;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover, .close-button:focus {
+            color: black;
+        }
+        .toolbar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .toolbar select {
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            flex-grow: 1;
+        }
+
+        .toolbar button {
+            padding: 0.8rem 1.5rem;
+            border: 1px solid var(--primary-color);
+            background-color: white;
+            color: var(--primary-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .toolbar button:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Gestión de Órdenes de Pago</h1>
+        <a href="dashboard-admin.html">Volver al Panel</a>
+    </header>
+
+    <main class="main-container">
+        <h2 class="section-title">Todas las Órdenes de Pago</h2>
+        
+        <div class="toolbar">
+            <select id="client-filter"><option value="">Filtrar por cliente...</option></select>
+            <select id="provider-filter"><option value="">Filtrar por proveedor...</option></select>
+            <select id="status-filter">
+                <option value="">Filtrar por estado...</option>
+                <option value="PENDIENTE">Pendiente</option>
+                <option value="PAGADO">Pagado</option>
+                <option value="CANCELADO">Cancelado</option>
+            </select>
+            <button id="clear-filters-btn">Quitar Filtros</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Orden</th>
+                        <th># Radicado</th>
+                        <th>Cliente</th>
+                        <th>Proveedor</th>
+                        <th>Monto Total</th>
+                        <th>Saldo Pendiente</th>
+                        <th>Estado</th>
+                        <th>Fecha de Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="payment-orders-table-body">
+                    <!-- Las filas se insertarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal para Historial de Pagos -->
+    <div id="history-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Historial de Pagos</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div id="modal-body" class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID Transacción</th>
+                            <th>Monto Pagado</th>
+                            <th>Fecha de Pago</th>
+                            <th>Método</th>
+                            <th>Referencia de Pago</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <!-- Historial de pagos aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const USERS_API_URL = 'http://192.168.100.2:3001/usuarios';
+        const PAGOS_API_URL = 'http://192.168.100.2:3004/pagos'; // Puerto corregido
+
+        // --- DOM Elements ---
+        const tableBody = document.getElementById('payment-orders-table-body');
+        const modal = document.getElementById('history-modal');
+        const closeModalBtn = modal.querySelector('.close-button');
+        const historyTableBody = document.getElementById('history-table-body');
+        const modalTitle = document.getElementById('modal-title');
+        const clientFilter = document.getElementById('client-filter');
+        const providerFilter = document.getElementById('provider-filter');
+        const statusFilter = document.getElementById('status-filter');
+        const clearFiltersBtn = document.getElementById('clear-filters-btn');
+
+        let allPaymentOrders = [];
+        let allUsers = [];
+
+        // --- Helper Functions ---
+        const formatCurrency = (value) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+        const formatDate = (dateString) => new Date(dateString).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+        const formatUnderscores = (text) => text ? text.replace(/_/g, ' ') : 'N/A';
+
+        const authenticatedFetch = async (url, options = {}) => {
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = 'login.html'; return; }
+            const headers = { ...options.headers, 'Authorization': `Bearer ${token}` };
+            const response = await fetch(url, { ...options, headers });
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    alert('Su sesión ha expirado o no tiene permisos.');
+                    window.location.href = 'login.html';
+                }
+                throw new Error(`Error ${response.status}`);
+            }
+            return response.json();
+        };
+
+        const renderTable = (paymentOrders) => {
+            tableBody.innerHTML = '';
+            if (paymentOrders.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No se encontraron órdenes de pago con los filtros seleccionados.</td></tr>';
+                return;
+            }
+
+            const userMap = new Map(allUsers.map(user => [user.id, user.nombre]));
+
+            paymentOrders.forEach(order => {
+                const isCancelable = order.estado === 'PENDIENTE';
+                const row = `
+                    <tr>
+                        <td>${order.id}</td>
+                        <td>${order.contrato_id}</td>
+                        <td>${userMap.get(order.cliente_id) || 'N/A'}</td>
+                        <td>${userMap.get(order.proveedor_id) || 'N/A'}</td>
+                        <td>${formatCurrency(order.monto_total)}</td>
+                        <td>${formatCurrency(order.saldo_pendiente)}</td>
+                        <td>${formatUnderscores(order.estado)}</td>
+                        <td>${formatDate(order.fecha_de_creacion)}</td>
+                        <td>
+                            <button class="actions-btn" data-order-id="${order.id}" data-action="history">Ver Historial</button>
+                            <button class="actions-btn cancel-btn" data-order-id="${order.id}" data-action="cancel" ${!isCancelable ? 'disabled' : ''}>Cancelar Orden</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        };
+
+        const populateFilters = () => {
+            const clients = allUsers.filter(u => u.tipo === 'CLIENTE');
+            const providers = allUsers.filter(u => u.tipo === 'PROVEEDOR');
+
+            clients.forEach(client => {
+                clientFilter.innerHTML += `<option value="${client.id}">${client.nombre}</option>`;
+            });
+
+            providers.forEach(provider => {
+                providerFilter.innerHTML += `<option value="${provider.id}">${provider.nombre}</option>`;
+            });
+        };
+
+        const applyFilters = () => {
+            const selectedClient = clientFilter.value;
+            const selectedProvider = providerFilter.value;
+            const selectedStatus = statusFilter.value;
+
+            let filteredOrders = allPaymentOrders;
+
+            if (selectedClient) {
+                filteredOrders = filteredOrders.filter(o => o.cliente_id == selectedClient);
+            }
+            if (selectedProvider) {
+                filteredOrders = filteredOrders.filter(o => o.proveedor_id == selectedProvider);
+            }
+            if (selectedStatus) {
+                filteredOrders = filteredOrders.filter(o => o.estado === selectedStatus);
+            }
+
+            renderTable(filteredOrders);
+        };
+
+        const openHistoryModal = async (orderId) => {
+            modalTitle.textContent = `Historial de Pagos - Orden #${orderId}`;
+            historyTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando historial...</td></tr>';
+            modal.style.display = 'flex';
+
+            try {
+                const orderDetails = await authenticatedFetch(`${PAGOS_API_URL}/transaccionesPorOrden/${orderId}`);
+                const transactions = orderDetails.transacciones || [];
+                historyTableBody.innerHTML = '';
+                if (transactions.length === 0) {
+                    historyTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay transacciones para esta orden.</td></tr>';
+                    return;
+                }
+                transactions.forEach(tx => {
+                    const row = `
+                        <tr>
+                            <td>${tx.id}</td>
+                            <td>${formatCurrency(tx.monto)}</td>
+                            <td>${formatDate(tx.fecha_transaccion)}</td>
+                            <td>${formatUnderscores(tx.metodo_pago)}</td>
+                            <td>${tx.id_referencia_externa || 'N/A'}</td>
+                        </tr>
+                    `;
+                    historyTableBody.innerHTML += row;
+                });
+            } catch (error) {
+                console.error('Error fetching payment history:', error);
+                historyTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--error-color);">Error al cargar el historial.</td></tr>';
+            }
+        };
+        
+        const cancelPaymentOrder = async (orderId) => {
+            if (!confirm(`¿Está seguro de que desea cancelar la orden de pago #${orderId}? Esta acción no se puede deshacer.`)) {
+                return;
+            }
+
+            try {
+                await authenticatedFetch(`${PAGOS_API_URL}/ordenes/${orderId}/cancelar`, {
+                    method: 'PATCH'
+                });
+                alert('Orden de pago cancelada con éxito.');
+                // Refrescar los datos
+                allPaymentOrders = await authenticatedFetch(`${PAGOS_API_URL}/mostrarOrdenes`);
+                applyFilters(); // Re-aplicar filtros en lugar de solo renderizar todo
+            } catch (error) {
+                console.error('Error canceling payment order:', error);
+                alert('Hubo un error al cancelar la orden de pago.');
+            }
+        };
+
+        // --- Event Listeners ---
+        tableBody.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const action = e.target.dataset.action;
+                const orderId = e.target.dataset.orderId;
+                if (action === 'history') {
+                    openHistoryModal(orderId);
+                } else if (action === 'cancel') {
+                    cancelPaymentOrder(orderId);
+                }
+            }
+        });
+
+        closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+        window.addEventListener('click', (e) => {
+            if (e.target == modal) modal.style.display = 'none';
+        });
+
+        clientFilter.addEventListener('change', applyFilters);
+        providerFilter.addEventListener('change', applyFilters);
+        statusFilter.addEventListener('change', applyFilters);
+        clearFiltersBtn.addEventListener('click', () => {
+            clientFilter.value = '';
+            providerFilter.value = '';
+            statusFilter.value = '';
+            applyFilters();
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Step 1: Fetch all payment orders
+                allPaymentOrders = await authenticatedFetch(`${PAGOS_API_URL}/mostrarOrdenes`);
+
+                // Step 2: Get unique user IDs from orders (both clients and providers)
+                const userIds = [...new Set([
+                    ...allPaymentOrders.map(o => o.cliente_id),
+                    ...allPaymentOrders.map(o => o.proveedor_id)
+                ].filter(id => id))];
+
+                // Step 3: Fetch only the required user profiles
+                if (userIds.length > 0) {
+                    allUsers = await Promise.all(
+                        userIds.map(id => authenticatedFetch(`${USERS_API_URL}/buscarUsuario/${id}`))
+                    );
+                } else {
+                    allUsers = [];
+                }
+
+                // Step 4: Populate filters and render the table
+                populateFilters();
+                renderTable(allPaymentOrders);
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+                tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--error-color);">Error al cargar los datos.</td></tr>`;
+            }
+        });
+
+    </script>
+
+</body>
+</html>

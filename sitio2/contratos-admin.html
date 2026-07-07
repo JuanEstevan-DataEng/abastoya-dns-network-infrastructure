@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Contratos - Abasto Ya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #2C5F2D; /* Verde oscuro */
+            --secondary-color: #97BC62; /* Verde claro */
+            --background-color: #F4F1DE; /* Beige claro */
+            --text-color: #3E2723; /* Marrón oscuro */
+            --white-color: #FFFFFF;
+            --error-color: #D32F2F;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .header a {
+            color: var(--white-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.3s;
+        }
+
+        .header a:hover {
+            opacity: 0.8;
+        }
+
+        .main-container {
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: flex-end; /* Alinea el filtro a la derecha */
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .toolbar select {
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 250px;
+        }
+
+        .table-container {
+            background-color: var(--white-color);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f7f7f7;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .btn-details {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .btn-details:hover {
+            background-color: #7BA04F;
+        }
+
+        /* Estilos para el Modal */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 2rem 2.5rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .close-button {
+            color: #aaa;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover, .close-button:focus {
+            color: black;
+        }
+
+        #details-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        #details-content p {
+            margin: 0.5rem 0;
+        }
+
+        #details-content p strong {
+            color: var(--primary-color);
+            display: block;
+        }
+
+        #products-table {
+            margin-top: 1rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Gestión de Contratos</h1>
+        <a href="dashboard-admin.html">Volver al Panel</a>
+    </header>
+
+    <main class="main-container">
+        <h2 class="section-title">Todos los Contratos</h2>
+        <div class="toolbar">
+            <select id="status-filter">
+                <option value="">Filtrar por estado...</option>
+                <option value="EN_APROBACION">En Aprobación</option>
+                <option value="APROBADO">Aprobado</option>
+                <option value="RECHAZADO">Rechazado</option>
+                <option value="TERMINADO">Terminado</option>
+            </select>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>NO. Radicado</th>
+                        <th>Cliente</th>
+                        <th>Proveedor</th>
+                        <th>Fecha de Creación</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="contracts-table-body">
+                    <!-- Las filas de contratos se insertarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal para Detalles del Contrato -->
+    <div id="details-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Detalles del Contrato</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div id="modal-body">
+                <div id="details-content">
+                    <!-- Detalles del contrato aquí -->
+                </div>
+                <h3 class="section-title" style="margin-top: 2rem; font-size: 1.5rem;">Productos Asociados</h3>
+                <div class="table-container" id="products-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio Unitario</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table-body">
+                            <!-- Productos del contrato aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const USERS_API_URL = 'http://192.168.100.2:3001/usuarios';
+        const CONTRATOS_API_URL = 'http://192.168.100.2:3003/contratos';
+        const PRODUCTS_API_URL = 'http://192.168.100.2:3002/productos';
+
+        // --- DOM Elements ---
+        const tableBody = document.getElementById('contracts-table-body');
+        const statusFilter = document.getElementById('status-filter');
+        const modal = document.getElementById('details-modal');
+        const closeModalBtn = document.querySelector('.close-button');
+        const detailsContent = document.getElementById('details-content');
+        const productsTableBody = document.getElementById('products-table-body');
+
+        let allContracts = [];
+        let allUsers = [];
+
+        // --- Helper Functions ---
+        const formatCurrency = (value) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+        const formatDate = (dateString) => new Date(dateString).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+        const formatUnderscores = (text) => text ? text.replace(/_/g, ' ') : 'N/A';
+
+        const authenticatedFetch = async (url, options = {}) => {
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = 'login.html'; return; }
+            const headers = { ...options.headers, 'Authorization': `Bearer ${token}` };
+            const response = await fetch(url, { ...options, headers });
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    alert('Su sesión ha expirado o no tiene permisos.');
+                    window.location.href = 'login.html';
+                }
+                throw new Error(`Error ${response.status}`);
+            }
+            return response.json();
+        };
+
+        const renderTable = (contracts) => {
+            tableBody.innerHTML = '';
+            if (contracts.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No se encontraron contratos.</td></tr>';
+                return;
+            }
+
+            const userMap = new Map(allUsers.map(user => [user.id, user.nombre]));
+
+            contracts.forEach(contract => {
+                const row = `
+                    <tr>
+                        <td>${contract.id}</td>
+                        <td>${userMap.get(contract.cliente_id) || 'N/A'}</td>
+                        <td>${userMap.get(contract.proveedor_id) || 'N/A'}</td>
+                        <td>${formatDate(contract.fecha_creacion)}</td>
+                        <td>${formatUnderscores(contract.estado)}</td>
+                        <td>${formatCurrency(contract.total)}</td>
+                        <td>
+                            <a href="#" class="btn-details" data-id="${contract.id}">Ver Detalles</a>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        };
+
+        const applyFilter = () => {
+            const status = statusFilter.value;
+            if (status) {
+                const filteredContracts = allContracts.filter(c => c.estado === status);
+                renderTable(filteredContracts);
+            } else {
+                renderTable(allContracts);
+            }
+        };
+
+        const openDetailsModal = async (contractId) => {
+            const contractDetails = allContracts.find(c => c.id == contractId);
+
+            if (!contractDetails) {
+                alert('No se encontraron los detalles del contrato.');
+                return;
+            }
+
+            const userMap = new Map(allUsers.map(user => [user.id, user.nombre]));
+
+            detailsContent.innerHTML = `
+                <p><strong>NO. Radicado:</strong> ${contractDetails.id}</p>
+                <p><strong>Cliente:</strong> ${userMap.get(contractDetails.cliente_id) || 'N/A'}</p>
+                <p><strong>Proveedor:</strong> ${userMap.get(contractDetails.proveedor_id) || 'N/A'}</p>
+                <p><strong>Fecha de Creación:</strong> ${formatDate(contractDetails.fecha_creacion)}</p>
+                <p><strong>Estado:</strong> ${formatUnderscores(contractDetails.estado)}</p>
+                <p><strong>Total del Contrato:</strong> ${formatCurrency(contractDetails.total)}</p>
+            `;
+
+            productsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando productos...</td></tr>';
+            modal.style.display = 'flex';
+
+            if (!contractDetails.productos || contractDetails.productos.length === 0) {
+                productsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Este contrato no tiene productos asociados.</td></tr>';
+                return;
+            }
+
+            try {
+                let counter = 1;
+                const productRows = await Promise.all(contractDetails.productos.map(async (item) => {
+                    const productOffer = await authenticatedFetch(`${PRODUCTS_API_URL}/buscarPorId/${item.producto_id_original}`);
+                    const subtotal = item.cantidad * item.precio_unitario;
+                    const productName = productOffer ? productOffer.nombre : 'Producto no encontrado';
+                    
+                    return `
+                        <tr>
+                            <td>${counter++}</td>
+                            <td>${formatUnderscores(productName)}</td>
+                            <td>${item.cantidad}</td>
+                            <td>${formatCurrency(item.precio_unitario)}</td>
+                            <td>${formatCurrency(subtotal)}</td>
+                        </tr>
+                    `;
+                }));
+
+                productsTableBody.innerHTML = productRows.join('');
+
+            } catch (error) {
+                console.error('Error fetching product details for contract:', error);
+                productsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--error-color);">Error al cargar los productos.</td></tr>';
+            }
+        };
+
+        // --- Event Listeners ---
+        statusFilter.addEventListener('change', applyFilter);
+
+        tableBody.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-details')) {
+                e.preventDefault();
+                const id = e.target.dataset.id;
+                openDetailsModal(id);
+            }
+        });
+
+        closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+        window.addEventListener('click', (e) => {
+            if (e.target == modal) modal.style.display = 'none';
+        });
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Step 1: Fetch all contracts
+                allContracts = await authenticatedFetch(`${CONTRATOS_API_URL}/traerTodosLosContratos`);
+
+                // Step 2: Get unique user IDs from contracts (both clients and providers)
+                const userIds = [...new Set([
+                    ...allContracts.map(c => c.cliente_id),
+                    ...allContracts.map(c => c.proveedor_id)
+                ].filter(id => id))]; // filter out null/undefined IDs
+
+                // Step 3: Fetch only the required user profiles
+                if (userIds.length > 0) {
+                    allUsers = await Promise.all(
+                        userIds.map(id => authenticatedFetch(`${USERS_API_URL}/buscarUsuario/${id}`))
+                    );
+                } else {
+                    allUsers = [];
+                }
+
+                // Step 4: Render the table
+                renderTable(allContracts);
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--error-color);">Error al cargar los datos.</td></tr>`;
+            }
+        });
+
+    </script>
+
+</body>
+</html>

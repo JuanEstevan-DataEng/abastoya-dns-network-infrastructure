@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - Abasto Ya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #2C5F2D; /* Verde oscuro */
+            --secondary-color: #97BC62; /* Verde claro */
+            --background-color: #F4F1DE; /* Beige claro */
+            --text-color: #3E2723; /* Marrón oscuro */
+            --white-color: #FFFFFF;
+            --error-color: #D32F2F;
+            --success-color: #388E3C;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .header a {
+            color: var(--white-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.3s;
+        }
+
+        .header a:hover {
+            opacity: 0.8;
+        }
+
+        .main-container {
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .toolbar .filters {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .toolbar input, .toolbar select {
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .toolbar input {
+            width: 300px;
+        }
+
+        .toolbar select {
+            width: 250px;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #1A4314;
+        }
+
+        .table-container {
+            background-color: var(--white-color);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f7f7f7;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .actions a {
+            color: var(--primary-color);
+            margin-right: 1rem;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .actions a:hover {
+            text-decoration: underline;
+        }
+
+        .actions .deactivate-btn {
+            background-color: var(--error-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .actions .deactivate-btn:hover {
+            background-color: #B71C1C;
+        }
+
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 2rem 2.5rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .close-button {
+            color: #aaa;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover, .close-button:focus {
+            color: black;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group.inline {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.9rem;
+            margin-top: -1rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .validation-message {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .success-message {
+            color: var(--success-color);
+        }
+
+        #admin-password-requirements {
+            list-style: none;
+            padding: 0;
+            margin-top: 0.5rem;
+        }
+
+        #admin-password-requirements li {
+            font-size: 0.8rem;
+            color: var(--error-color);
+            transition: color 0.3s;
+            padding-left: 1.2em;
+            position: relative;
+        }
+        
+        #admin-password-requirements li::before {
+            content: '✕';
+            position: absolute;
+            left: 0;
+            color: var(--error-color);
+            transition: all 0.3s;
+        }
+
+        #admin-password-requirements li.valid {
+            color: var(--success-color);
+            text-decoration: line-through;
+        }
+
+        #admin-password-requirements li.valid::before {
+            content: '✓';
+            color: var(--success-color);
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem 0;
+            margin-top: 1.5rem;
+        }
+
+        .pagination-btn {
+            background-color: var(--white-color);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            margin: 0 0.3rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .pagination-btn:hover, .pagination-btn.active {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Gestión de Usuarios</h1>
+        <a href="dashboard-admin.html">Volver al Panel</a>
+    </header>
+
+    <main class="main-container">
+        <h2 class="section-title">Usuarios Activos</h2>
+        <div class="toolbar">
+            <div class="filters">
+                <input type="text" id="search-input" placeholder="Buscar por nombre, email o teléfono...">
+                <select id="role-filter">
+                    <option value="">Todos los roles</option>
+                    <option value="CLIENTE">Cliente</option>
+                    <option value="PROVEEDOR">Proveedor</option>
+                    <option value="ADMIN">Admin</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" id="add-admin-btn">+ Crear Nuevo Admin</button>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Cédula/NIT</th>
+                        <th>Dirección</th>
+                        <th>Tipo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- User rows will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+        <div id="pagination-container" class="pagination-container"></div>
+    </main>
+
+    <!-- Modal para Editar Usuario -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Editar Usuario</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <form id="user-form">
+                <input type="hidden" id="user-id">
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono">
+                </div>
+                <div class="form-group">
+                    <label for="cedula_nit">Cédula/NIT</label>
+                    <input type="text" id="cedula_nit" required>
+                </div>
+                <div class="form-group">
+                    <label for="direccion">Dirección</label>
+                    <input type="text" id="direccion" required>
+                </div>
+
+                <hr style="margin: 2rem 0; border: 1px solid #eee;">
+                <h3 style="margin-bottom: 1.5rem; color: var(--primary-color);">Cambiar Contraseña (Opcional)</h3>
+                <div class="form-group">
+                    <label for="password">Nueva Contraseña</label>
+                    <input type="password" id="password">
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirmar Nueva Contraseña</label>
+                    <input type="password" id="confirm-password">
+                </div>
+
+                <span id="user-error-message" class="error-message"></span>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Crear Admin -->
+    <div id="admin-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Crear Nuevo Admin</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <form id="admin-form">
+                <div class="form-group">
+                    <label for="admin-username">Username</label>
+                    <input type="text" id="admin-username" required>
+                    <div id="admin-username-validation" class="validation-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="admin-nombre">Nombre Completo</label>
+                    <input type="text" id="admin-nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin-telefono">Teléfono</label>
+                    <input type="tel" id="admin-telefono" required pattern="[0-9]+" title="Solo se admiten números.">
+                </div>
+                <div class="form-group">
+                    <label for="admin-email">Email</label>
+                    <input type="email" id="admin-email" required>
+                    <div id="admin-email-validation" class="validation-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">Contraseña</label>
+                    <input type="password" id="admin-password" required>
+                    <ul id="admin-password-requirements">
+                        <li id="admin-length">Entre 12 y 16 caracteres</li>
+                        <li id="admin-number">Al menos un número</li>
+                        <li id="admin-symbol">Al menos un símbolo</li>
+                    </ul>
+                </div>
+                <div class="form-group">
+                    <label for="admin-cedula_nit">Cédula/NIT</label>
+                    <input type="text" id="admin-cedula_nit" required>
+                </div>
+                <div class="form-group">
+                    <label>Dirección</label>
+                    <div class="form-group inline">
+                        <select id="admin-tipoVia" name="admin-tipoVia">
+                            <option value="Calle">Calle</option>
+                            <option value="Carrera">Carrera</option>
+                            <option value="Avenida">Avenida</option>
+                            <option value="Diagonal">Diagonal</option>
+                            <option value="Transversal">Transversal</option>
+                        </select>
+                        <input type="text" id="admin-numeroVia" placeholder="Ej: 24A" required>
+                    </div>
+                    <div class="form-group inline">
+                        <input type="text" id="admin-numeroCruce" placeholder="# 70" required>
+                        <input type="text" id="admin-numeroPuerta" placeholder="- 15" required>
+                    </div>
+                </div>
+                <span id="admin-error-message" class="error-message"></span>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Crear Admin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const USERS_API_URL = 'http://192.168.100.2:3001/usuarios';
+
+        // --- DOM Elements ---
+        const usersTableBody = document.getElementById('users-table-body');
+        const searchInput = document.getElementById('search-input');
+        const roleFilter = document.getElementById('role-filter');
+        const paginationContainer = document.getElementById('pagination-container');
+        
+        // Edit User Modal
+        const userModal = document.getElementById('user-modal');
+        const userForm = document.getElementById('user-form');
+        const userIdInput = document.getElementById('user-id');
+        const userModalCloseButton = userModal.querySelector('.close-button');
+        const userErrorMessage = document.getElementById('user-error-message');
+
+        // Add Admin Modal
+        const addAdminBtn = document.getElementById('add-admin-btn');
+        const adminModal = document.getElementById('admin-modal');
+        const adminForm = document.getElementById('admin-form');
+        const adminModalCloseButton = adminModal.querySelector('.close-button');
+        const adminErrorMessage = document.getElementById('admin-error-message');
+        const adminUsernameInput = document.getElementById('admin-username');
+        const adminUsernameValidation = document.getElementById('admin-username-validation');
+        const adminEmailInput = document.getElementById('admin-email');
+        const adminEmailValidation = document.getElementById('admin-email-validation');
+        const adminPasswordInput = document.getElementById('admin-password');
+        const adminLengthReq = document.getElementById('admin-length');
+        const adminNumberReq = document.getElementById('admin-number');
+        const adminSymbolReq = document.getElementById('admin-symbol');
+
+
+        let allUsers = [];
+        let currentPage = 1;
+        const rowsPerPage = 15;
+
+        const authenticatedFetch = async (url, options = {}) => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            const headers = { ...options.headers, 'Authorization': `Bearer ${token}` };
+            const response = await fetch(url, { ...options, headers });
+
+            if (!response.ok) {
+                let errorData = { message: `Error ${response.status}: ${response.statusText}` };
+                try {
+                    const jsonResponse = await response.json();
+                    errorData = { ...errorData, ...jsonResponse };
+                } catch (e) {
+                    // No content to parse
+                }
+
+                if (response.status === 401 || response.status === 403) {
+                    alert('Su sesión ha expirado o no tiene permisos. Por favor, inicie sesión de nuevo.');
+                    window.location.href = 'login.html';
+                    throw new Error('Unauthorized');
+                }
+                const finalErrorMessage = errorData.message || errorData.error || `Error ${response.status}: ${response.statusText}`;
+                throw new Error(finalErrorMessage);
+            }
+            return response;
+        };
+
+        const renderUsersTable = (users) => {
+            usersTableBody.innerHTML = '';
+            if (users.length === 0) {
+                usersTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No se encontraron usuarios.</td></tr>';
+                return;
+            }
+            users.forEach(user => {
+                const row = `
+                    <tr>
+                        <td>${user.nombre}</td>
+                        <td>${user.email}</td>
+                        <td>${user.telefono || 'N/A'}</td>
+                        <td>${user.cedula_NIT || 'N/A'}</td>
+                        <td>${user.direccion || 'N/A'}</td>
+                        <td>${user.tipo}</td>
+                        <td class="actions">
+                            <a href="#" class="edit-btn" data-id="${user.id}">Editar</a>
+                            <button class="deactivate-btn" data-id="${user.id}">Desactivar</button>
+                        </td>
+                    </tr>
+                `;
+                usersTableBody.innerHTML += row;
+            });
+        };
+
+        const renderPagination = (totalItems) => {
+            paginationContainer.innerHTML = '';
+            const totalPages = Math.ceil(totalItems / rowsPerPage);
+            if (totalPages <= 1) return;
+
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = '&laquo; Anterior';
+            prevButton.className = 'pagination-btn';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) { currentPage--; applyFiltersAndPagination(); }
+            });
+            paginationContainer.appendChild(prevButton);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.innerText = i;
+                pageButton.className = 'pagination-btn';
+                if (i === currentPage) pageButton.classList.add('active');
+                pageButton.addEventListener('click', () => { currentPage = i; applyFiltersAndPagination(); });
+                paginationContainer.appendChild(pageButton);
+            }
+
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = 'Siguiente &raquo;';
+            nextButton.className = 'pagination-btn';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) { currentPage++; applyFiltersAndPagination(); }
+            });
+            paginationContainer.appendChild(nextButton);
+        };
+
+        const applyFiltersAndPagination = () => {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const selectedRole = roleFilter.value;
+
+            let filteredUsers = allUsers.filter(user => user.estado === 'ACTIVO');
+
+            if (searchTerm) {
+                filteredUsers = filteredUsers.filter(user => {
+                    const nombre = (user.nombre || '').toLowerCase();
+                    const email = (user.email || '').toLowerCase();
+                    const telefono = (user.telefono || '').toString().toLowerCase();
+                    
+                    return nombre.includes(searchTerm) || 
+                           email.includes(searchTerm) || 
+                           telefono.includes(searchTerm);
+                });
+            }
+
+            if (selectedRole) {
+                filteredUsers = filteredUsers.filter(user => user.tipo === selectedRole);
+            }
+
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const paginatedUsers = filteredUsers.slice(startIndex, startIndex + rowsPerPage);
+
+            renderUsersTable(paginatedUsers);
+            renderPagination(filteredUsers.length);
+        };
+
+        const fetchUsers = async () => {
+            try {
+                const response = await authenticatedFetch(`${USERS_API_URL}/verUsuarios`);
+                allUsers = await response.json();
+                applyFiltersAndPagination();
+            } catch (error) {
+                if (error.message !== 'Unauthorized') {
+                    usersTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--error-color);">${error.message}</td></tr>`;
+                }
+            }
+        };
+
+        const deactivateUser = async (userId) => {
+            if (!confirm('¿Está seguro de que desea desactivar a este usuario? Esta acción cambiará su estado a INACTIVO.')) {
+                return;
+            }
+            try {
+                await authenticatedFetch(`${USERS_API_URL}/actualizarUsuario/${userId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: 'INACTIVO' })
+                });
+                alert('Usuario desactivado con éxito.');
+                fetchUsers(); // Refresh the user list
+            } catch (error) {
+                if (error.message !== 'Unauthorized') {
+                    alert(`Error al desactivar usuario: ${error.message}`);
+                }
+            }
+        };
+
+        // --- Modal Handling ---
+        const openUserModal = (user) => {
+            userForm.reset();
+            userErrorMessage.style.display = 'none';
+            userIdInput.value = user.id;
+            document.getElementById('nombre').value = user.nombre;
+            document.getElementById('email').value = user.email;
+            document.getElementById('telefono').value = user.telefono || '';
+            document.getElementById('cedula_nit').value = user.cedula_NIT || '';
+            document.getElementById('direccion').value = user.direccion || '';
+            userModal.style.display = 'flex';
+        };
+
+        const closeUserModal = () => { userModal.style.display = 'none'; };
+        const openAdminModal = () => { 
+            adminForm.reset(); 
+            adminErrorMessage.style.display = 'none';
+            adminModal.style.display = 'flex'; 
+        };
+        const closeAdminModal = () => { adminModal.style.display = 'none'; };
+
+        // --- Real-time Validation ---
+        const debounce = (func, delay) => {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        };
+
+        const checkExistence = async (field, value, validationElement, message) => {
+            try {
+                const response = await fetch(`${USERS_API_URL}/check-${field}/${value}`, { cache: 'no-cache' });
+                const data = await response.json();
+                validationElement.style.display = 'block';
+                if (data.existe) {
+                    validationElement.textContent = `Este ${message} ya está en uso.`;
+                    validationElement.className = 'validation-message error-message';
+                } else {
+                    validationElement.textContent = `${message.charAt(0).toUpperCase() + message.slice(1)} disponible.`;
+                    validationElement.className = 'validation-message success-message';
+                }
+            } catch (error) {
+                validationElement.style.display = 'none';
+            }
+        };
+
+        adminUsernameInput.addEventListener('input', debounce(() => {
+            if (adminUsernameInput.value.length >= 3) {
+                checkExistence('username', adminUsernameInput.value, adminUsernameValidation, 'nombre de usuario');
+            }
+        }, 500));
+
+        adminEmailInput.addEventListener('input', debounce(() => {
+            if (adminEmailInput.value.includes('@') && adminEmailInput.value.includes('.')) {
+                checkExistence('email', adminEmailInput.value, adminEmailValidation, 'correo electrónico');
+            }
+        }, 500));
+
+        adminPasswordInput.addEventListener('input', () => {
+            const pass = adminPasswordInput.value;
+            adminLengthReq.classList.toggle('valid', pass.length >= 12 && pass.length <= 16);
+            adminNumberReq.classList.toggle('valid', /[0-9]/.test(pass));
+            adminSymbolReq.classList.toggle('valid', /[^A-Za-z0-9]/.test(pass));
+        });
+
+        // --- Form Validation ---
+        const validateForm = (form) => {
+            let isValid = true;
+            const requiredInputs = form.querySelectorAll('input[required]');
+            requiredInputs.forEach(input => {
+                if (!input.value.trim()) {
+                    isValid = false;
+                }
+            });
+            return isValid;
+        }
+
+        // --- Input Sanitization ---
+        document.querySelectorAll('input[pattern="[0-9]+"]').forEach(input => {
+            input.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            });
+        });
+
+        // --- Event Listeners ---
+        userForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            userErrorMessage.style.display = 'none';
+
+            // Recopilar datos básicos
+            const id = userIdInput.value;
+            const userData = {
+                nombre: document.getElementById('nombre').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                cedula_NIT: document.getElementById('cedula_nit').value,
+                direccion: document.getElementById('direccion').value,
+            };
+
+            // Lógica para la contraseña
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (password) { // Solo si se escribió una nueva contraseña
+                if (password !== confirmPassword) {
+                    userErrorMessage.textContent = 'Las contraseñas no coinciden.';
+                    userErrorMessage.style.display = 'block';
+                    return;
+                }
+                // Añadir la contraseña al objeto a actualizar
+                userData.password = password;
+            }
+
+            try {
+                await authenticatedFetch(`${USERS_API_URL}/actualizar/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                alert('Usuario actualizado con éxito.');
+                closeUserModal();
+                fetchUsers();
+            } catch (error) {
+                if (error.message !== 'Unauthorized') {
+                    userErrorMessage.textContent = `Error: ${error.message}`;
+                    userErrorMessage.style.display = 'block';
+                }
+            }
+        });
+
+        adminForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const isUsernameValid = adminUsernameValidation.classList.contains('success-message');
+            const isEmailValid = adminEmailValidation.classList.contains('success-message');
+            const arePasswordReqsMet = adminLengthReq.classList.contains('valid') && adminNumberReq.classList.contains('valid') && adminSymbolReq.classList.contains('valid');
+
+            if (!validateForm(adminForm) || !isUsernameValid || !isEmailValid || !arePasswordReqsMet) {
+                adminErrorMessage.textContent = 'Por favor, corrija los errores y complete todos los campos.';
+                adminErrorMessage.style.display = 'block';
+                return;
+            }
+            adminErrorMessage.style.display = 'none';
+
+            // Pedir la contraseña del admin actual
+            const adminPassword = prompt("Para confirmar, por favor ingrese su contraseña de administrador:");
+            if (!adminPassword) {
+                alert("La contraseña es requerida para crear un nuevo administrador.");
+                return;
+            }
+
+            const direccionCompleta = `
+                ${document.getElementById('admin-tipoVia').value} 
+                ${document.getElementById('admin-numeroVia').value} # 
+                ${document.getElementById('admin-numeroCruce').value} - 
+                ${document.getElementById('admin-numeroPuerta').value}
+            `.trim().replace(/\s+/g, ' ');
+
+            const adminData = {
+                username: document.getElementById('admin-username').value,
+                nombre: document.getElementById('admin-nombre').value,
+                telefono: document.getElementById('admin-telefono').value,
+                email: document.getElementById('admin-email').value,
+                password: document.getElementById('admin-password').value,
+                cedula_NIT: document.getElementById('admin-cedula_nit').value,
+                direccion: direccionCompleta,
+                tipo: 'ADMIN',
+                estado: 'ACTIVO',
+                adminPassword: adminPassword // Añadir la contraseña del admin actual
+            };
+
+            try {
+                // Usar authenticatedFetch para enviar el token
+                const response = await authenticatedFetch(`${USERS_API_URL}/crearUsuario`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(adminData)
+                });
+
+                // authenticatedFetch ya maneja los errores de red y de autenticación (401, 403)
+                // por lo que aquí solo necesitamos parsear el resultado si la respuesta es OK.
+                const result = await response.json();
+
+                // El backend ahora puede devolver otros errores (ej. 400, 409) que no son manejados por authenticatedFetch
+                // pero que sí tienen un body. Si la respuesta no fue 'ok', el error se lanza en authenticatedFetch.
+                // Aquí asumimos que si llegamos, la respuesta fue ok (201).
+                
+                alert('Administrador creado con éxito.');
+                closeAdminModal();
+                fetchUsers();
+
+            } catch (error) {
+                // Los errores de authenticatedFetch (incluyendo mensajes del backend) se capturan aquí
+                if (error.message !== 'Unauthorized') {
+                    alert(`Error al crear admin: ${error.message}`);
+                }
+            }
+        });
+
+        usersTableBody.addEventListener('click', (e) => {
+            if (e.target.classList.contains('edit-btn')) {
+                e.preventDefault();
+                const id = e.target.dataset.id;
+                const userToEdit = allUsers.find(u => u.id == id);
+                if (userToEdit) openUserModal(userToEdit);
+            } else if (e.target.classList.contains('deactivate-btn')) {
+                const id = e.target.dataset.id;
+                deactivateUser(id);
+            }
+        });
+
+        addAdminBtn.addEventListener('click', openAdminModal);
+        userModalCloseButton.addEventListener('click', closeUserModal);
+        adminModalCloseButton.addEventListener('click', closeAdminModal);
+        window.addEventListener('click', (event) => {
+            if (event.target == userModal) closeUserModal();
+            if (event.target == adminModal) closeAdminModal();
+        });
+
+        searchInput.addEventListener('input', () => {
+            currentPage = 1;
+            applyFiltersAndPagination();
+        });
+        roleFilter.addEventListener('change', () => {
+            currentPage = 1;
+            applyFiltersAndPagination();
+        });
+
+        document.addEventListener('DOMContentLoaded', fetchUsers);
+    </script>
+
+</body>
+</html>

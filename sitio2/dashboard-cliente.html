@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Cliente - Abasto Ya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #2C5F2D; /* Verde oscuro */
+            --secondary-color: #97BC62; /* Verde claro */
+            --accent-color: #F9A03F; /* Naranja/amarillo */
+            --background-color: #F4F1DE; /* Beige claro */
+            --text-color: #3E2723; /* Marrón oscuro */
+            --pending-color-1: #E63946; /* Rojo Fuerte */
+            --pending-color-2: #457B9D; /* Azul */
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 { margin: 0; font-size: 1.8rem; }
+        .header .user-info { font-weight: 600; }
+
+        .main-container {
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .summary-section {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 3rem;
+        }
+
+        .summary-section h2 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 2fr;
+            gap: 2rem;
+            align-items: stretch;
+        }
+
+        .summary-card, .delivery-widget {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-color);
+            display: block;
+        }
+
+        .summary-card:hover, .delivery-widget:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+        }
+
+        .summary-card h3 {
+            font-size: 1.5rem;
+            margin: 0 0 1rem 0;
+        }
+        .summary-card.contracts h3 { color: var(--pending-color-1); }
+        .summary-card.payments h3 { color: var(--pending-color-2); }
+
+        .summary-card .count {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .delivery-widget h3 {
+            font-size: 1.5rem;
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-color);
+        }
+        .delivery-widget p { margin: 0 0 1.5rem 0; color: #666; }
+
+        .dashboard-menu {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 2rem;
+        }
+
+        .menu-button {
+            background-color: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 15px;
+            padding: 2.5rem;
+            font-size: 1.6rem;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .menu-button:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(44, 95, 45, 0.3);
+        }
+
+        .menu-button.large { grid-column: span 3; }
+        .menu-button.small { grid-column: span 2; }
+
+        .logout-button {
+            background-color: #D32F2F; /* Rojo */
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        .logout-button:hover { background-color: #B71C1C; }
+
+        /* --- Progress Bar Styles --- */
+        .progress-bar { display: flex; align-items: center; width: 100%; max-width: 400px; margin: 0 auto; }
+        .progress-step { display: flex; flex-direction: column; align-items: center; position: relative; flex-grow: 1; }
+        .progress-step .node { width: 20px; height: 20px; border-radius: 50%; background-color: #ccc; border: 3px solid #fff; box-shadow: 0 0 0 2px #ccc; transition: all 0.3s ease; }
+        .progress-step .label { font-size: 0.75rem; margin-top: 0.5rem; color: #aaa; font-weight: 600; }
+        .progress-step.is-complete .node, .progress-step.is-active .node { background-color: var(--secondary-color); box-shadow: 0 0 0 2px var(--secondary-color); }
+        .progress-step.is-active .node { background-color: var(--primary-color); box-shadow: 0 0 0 2px var(--primary-color); }
+        .progress-step.is-active .label { color: var(--primary-color); }
+        .progress-step:not(:last-child)::after { 
+            content: ''; 
+            position: absolute; 
+            top: 10px; 
+            left: 50%; 
+            height: 4px; 
+            width: 0; /* Oculto por defecto */
+            background-color: #ccc; 
+            z-index: -1; 
+            transition: width 0.5s ease-in-out, background-color 0.3s ease; /* Transición para ancho y color */
+        }
+
+        .progress-bar:hover .progress-step:not(:last-child)::after {
+            width: 100%; /* Visible en hover */
+        }
+        .progress-step.is-complete:not(:last-child)::after { background-color: var(--secondary-color); }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Panel de Cliente</h1>
+        <div class="user-info">
+            <span id="client-username"></span>
+            <button class="logout-button" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <section class="summary-section">
+            <h2>Resumen Rápido</h2>
+            <div class="summary-grid">
+                <a href="contratos-cliente.html" class="summary-card contracts">
+                    <h3>Contratos Pendientes</h3>
+                    <p class="count" id="pending-contracts-count">0</p>
+                </a>
+                <a href="pagos-cliente.html" class="summary-card payments">
+                    <h3>Pagos Pendientes</h3>
+                    <p class="count" id="pending-payments-count">0</p>
+                </a>
+                <a href="entregas-cliente.html" class="delivery-widget" id="delivery-widget">
+                    <h3>Última Entrega en Progreso</h3>
+                    <div id="delivery-widget-content"><p>No hay entregas en curso.</p></div>
+                </a>
+            </div>
+        </section>
+
+        <div class="dashboard-menu">
+            <a href="ofertas-cliente.html" class="menu-button large">Ver Ofertas</a>
+            <a href="entregas-cliente.html" class="menu-button large">Mis Entregas</a>
+            <a href="contratos-cliente.html" class="menu-button small">Mis Contratos</a>
+            <a href="pagos-cliente.html" class="menu-button small">Mis Pagos</a>
+            <a href="perfil-cliente.html" class="menu-button small">Mi Perfil</a>
+        </div>
+    </main>
+
+    <script>
+        const CONTRATOS_API_URL = 'http://192.168.100.2:3003/contratos';
+        const PAGOS_API_URL = 'http://192.168.100.2:3004/pagos';
+        const ENTREGAS_API_URL = 'http://192.168.100.2:3005/entregas';
+        const USUARIOS_API_URL = 'http://192.168.100.2:3001/usuarios';
+
+        const deliveryStates = ['PENDIENTE', 'EN_PREPARACION', 'EN_RUTA', 'ENTREGADO'];
+
+        const authenticatedFetch = async (url, options = {}) => {
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = 'login.html'; return; }
+            const headers = { 'Content-Type': 'application/json', ...options.headers, 'Authorization': `Bearer ${token}` };
+            const response = await fetch(url, { ...options, headers });
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) { alert('Su sesión ha expirado.'); window.location.href = 'login.html'; }
+                throw new Error(`Error ${response.status}`);
+            }
+            return response.json();
+        };
+
+        const createProgressBarHTML = (currentState) => {
+            const currentStateIndex = deliveryStates.indexOf(currentState);
+            let stepsHTML = '';
+            deliveryStates.forEach((state, index) => {
+                let stepClass = 'progress-step';
+                if (index < currentStateIndex) stepClass += ' is-complete';
+                else if (index === currentStateIndex) stepClass += ' is-active';
+                const label = state.replace(/_/g, ' ');
+                stepsHTML += `<div class="${stepClass}"><div class="node"></div><div class="label">${label}</div></div>`;
+            });
+            return `<div class="progress-bar">${stepsHTML}</div>`;
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = JSON.parse(localStorage.getItem('usuario'));
+            const token = localStorage.getItem('token');
+
+            if (!token || !user || user.tipo !== 'CLIENTE') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            document.getElementById('client-username').textContent = user.username ? `Bienvenido, ${user.username}` : 'Bienvenido';
+
+            try {
+                const [contracts, payments, deliveries] = await Promise.all([
+                    authenticatedFetch(`${CONTRATOS_API_URL}/traerTodosLosContratos`).catch(e => { console.error('Failed to fetch contracts:', e); return []; }),
+                    authenticatedFetch(`${PAGOS_API_URL}/mostrarOrdenes`).catch(e => { console.error('Failed to fetch payments:', e); return []; }),
+                    authenticatedFetch(`${ENTREGAS_API_URL}/`).catch(e => { console.error('Failed to fetch deliveries:', e); return []; })
+                ]);
+
+                // Contratos pendientes
+                const pendingContracts = contracts.filter(c => c.estado === 'EN_APROBACION');
+                document.getElementById('pending-contracts-count').textContent = pendingContracts.length;
+
+                // Pagos pendientes
+                const pendingPayments = payments.filter(p => p.estado === 'PENDIENTE');
+                document.getElementById('pending-payments-count').textContent = pendingPayments.length;
+
+                // Enriquece las entregas con el nombre del proveedor
+                const providerIds = [...new Set(deliveries.map(d => d.proveedor_id))];
+                const providerPromises = providerIds.map(id => 
+                    authenticatedFetch(`${USUARIOS_API_URL}/buscarUsuario/${id}`).catch(e => { console.error(`Failed to fetch provider ${id}:`, e); return { id, nombre: 'Desconocido' }; })
+                );
+                const providers = await Promise.all(providerPromises);
+                const providerMap = new Map(providers.map(p => [p.id, p.nombre]));
+
+                const enrichedDeliveries = deliveries.map(delivery => ({
+                    ...delivery,
+                    proveedor_nombre: providerMap.get(delivery.proveedor_id)
+                }));
+
+                // Entrega más reciente
+                const ongoingDeliveries = enrichedDeliveries
+                    .filter(d => d.estado !== 'ENTREGADO' && d.estado !== 'CANCELADO' && d.estado !== 'INCIDENCIA')
+                    .sort((a, b) => b.id - a.id); // Ordenar por ID descendente para obtener la más reciente
+
+                const deliveryWidgetContent = document.getElementById('delivery-widget-content');
+                if (ongoingDeliveries.length > 0) {
+                    const latestDelivery = ongoingDeliveries[0];
+                    deliveryWidgetContent.innerHTML = `
+                        <p>Entrega #${latestDelivery.id} con <strong>${latestDelivery.proveedor_nombre || 'N/A'}</strong></p>
+                        ${createProgressBarHTML(latestDelivery.estado)}
+                    `;
+                } else {
+                    deliveryWidgetContent.innerHTML = '<p>No hay entregas en curso.</p>';
+                }
+
+            } catch (error) {
+                console.error('Error al cargar el resumen del dashboard:', error);
+                // Opcional: mostrar un mensaje de error en el dashboard
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('usuario');
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+    </script>
+
+</body>
+</html>

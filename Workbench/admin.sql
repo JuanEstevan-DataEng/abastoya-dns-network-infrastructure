@@ -1,0 +1,2 @@
+INSERT INTO usuarios.usuario (username, nombre, tipo, cedula_NIT, telefono, direccion, email, password, estado)
+VALUES ('adminjuan', 'Juan Estevan', 'ADMIN', '1111665738', 3194660662, 'N/A', 'admin@abastoya.com', '$2b$10$nDUuc4qDiBHXjW9w7YOpUesa72qmEDy3/4EsqR1kFyHaU32O5wBR2', 'ACTIVO');

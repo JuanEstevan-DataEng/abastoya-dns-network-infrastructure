@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Entregas - Abasto Ya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #2C5F2D;
+            --secondary-color: #97BC62;
+            --background-color: #F4F1DE;
+            --text-color: #3E2723;
+            --white-color: #FFFFFF;
+            --error-color: #D32F2F;
+            --highlight-color: rgba(249, 160, 63, 0.5);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 { margin: 0; font-size: 1.8rem; }
+        .header a { color: var(--white-color); text-decoration: none; font-weight: 600; }
+
+        .main-container { padding: 2rem; }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .table-container {
+            background-color: var(--white-color);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem 1.2rem; text-align: left; border-bottom: 1px solid #ddd; vertical-align: middle; }
+        th { background-color: #f7f7f7; font-weight: 700; color: var(--primary-color); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #f1f1f1; }
+
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            vertical-align: middle;
+            margin-left: 0.5rem;
+            font-family: inherit;
+            font-size: 100%;
+        }
+        .btn:first-child { margin-left: 0; }
+
+        .btn-update-status {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-update-status:hover { background-color: #1A4314; }
+        .btn-update-status:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-details {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        .btn-details:hover { background-color: #7BA04F; }
+
+        .btn-reschedule {
+            background-color: #F9A03F; /* Naranja/amarillo */
+            color: white;
+        }
+        .btn-reschedule:hover { background-color: #E08A2E; }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+        .modal-content { background-color: #fefefe; margin: auto; padding: 2rem 2.5rem; border-radius: 15px; width: 90%; max-width: 900px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+        .modal-header h2 { margin: 0; color: var(--primary-color); }
+        .close-button { color: #aaa; font-size: 2rem; font-weight: bold; cursor: pointer; }
+        .close-button:hover, .close-button:focus { color: black; }
+        
+        .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+        .detail-section { background-color: #f9f9f9; padding: 1.5rem; border-radius: 10px; }
+        .detail-section h3 { margin-top: 0; color: var(--primary-color); border-bottom: 2px solid var(--secondary-color); padding-bottom: 0.5rem; }
+        .detail-section p { margin: 0.8rem 0; }
+        .detail-section p strong { color: var(--text-color); display: block; font-weight: 600; }
+
+        /* --- Progress Bar Styles --- */
+        .progress-bar { display: flex; align-items: center; width: 100%; max-width: 400px; }
+        .progress-step { display: flex; flex-direction: column; align-items: center; position: relative; flex-grow: 1; }
+        .progress-step .node { width: 20px; height: 20px; border-radius: 50%; background-color: #ccc; border: 3px solid #fff; box-shadow: 0 0 0 2px #ccc; transition: all 0.3s ease; }
+        .progress-step .label { font-size: 0.75rem; margin-top: 0.5rem; color: #aaa; font-weight: 600; }
+        .progress-step.is-complete .node, .progress-step.is-active .node { background-color: var(--secondary-color); box-shadow: 0 0 0 2px var(--secondary-color); }
+        .progress-step.is-active .node { background-color: var(--primary-color); box-shadow: 0 0 0 2px var(--primary-color); }
+        .progress-step.is-active .label { color: var(--primary-color); }
+        .progress-step:not(:last-child)::after { content: ''; position: absolute; top: 10px; left: 50%; height: 4px; width: 100%; background-color: #ccc; z-index: -1; }
+        .progress-step.is-complete:not(:last-child)::after { background-color: var(--secondary-color); }
+
+        /* --- Highlight Animation --- */
+        @keyframes highlight-fade {
+            from { background-color: var(--highlight-color); }
+            to { background-color: transparent; }
+        }
+        .highlight {
+            animation: highlight-fade 3s ease-out;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Gestión de Entregas</h1>
+        <a href="dashboard-proveedor.html">Volver al Panel</a>
+    </header>
+
+    <main class="main-container">
+        <h2 class="section-title">Mis Entregas Pendientes y en Curso</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Entrega</th>
+                        <th># Radicado</th>
+                        <th>Cliente</th>
+                        <th>Fecha Estimada</th>
+                        <th>Progreso de Entrega</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="deliveries-table-body">
+                    <!-- Delivery rows will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal para Detalles -->
+    <div id="details-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Detalles Consolidados</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div id="modal-body">
+                <!-- Contenido del modal aquí -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ENTREGAS_API_URL = 'http://192.168.100.2:3005/entregas';
+        const USERS_API_URL = 'http://192.168.100.2:3001/usuarios';
+        const CONTRATOS_API_URL = 'http://192.168.100.2:3003/contratos';
+        const PAGOS_API_URL = 'http://192.168.100.2:3004/pagos';
+        const PRODUCTS_API_URL = 'http://192.168.100.2:3002/productos';
+
+        const tableBody = document.getElementById('deliveries-table-body');
+        const modal = document.getElementById('details-modal');
+        const modalBody = document.getElementById('modal-body');
+        const closeModalBtn = modal.querySelector('.close-button');
+
+        let userMap = new Map();
+
+        const deliveryStates = ['PENDIENTE', 'EN_PREPARACION', 'EN_RUTA', 'ENTREGADO'];
+        const finalStates = ['ENTREGADO', 'CANCELADO', 'INCIDENCIA'];
+
+        const formatCurrency = (value) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+        const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+        const formatUnderscores = (text) => text ? text.replace(/_/g, ' ') : 'N/A';
+
+        const authenticatedFetch = async (url, options = {}) => {
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = 'login.html'; return; }
+            const headers = { 'Content-Type': 'application/json', ...options.headers, 'Authorization': `Bearer ${token}` };
+            const response = await fetch(url, { ...options, headers });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                if (response.status === 401 || response.status === 403) {
+                    alert('Su sesión ha expirado o no tiene permisos.');
+                    window.location.href = 'login.html';
+                }
+                throw new Error(errorData.message || `Error ${response.status}`);
+            }
+            return response; // Returns the raw response, needs .json()
+        };
+
+        const createProgressBarHTML = (currentState) => {
+            const currentStateIndex = deliveryStates.indexOf(currentState);
+            let stepsHTML = '';
+
+            deliveryStates.forEach((state, index) => {
+                let stepClass = 'progress-step';
+                if (index < currentStateIndex) {
+                    stepClass += ' is-complete';
+                } else if (index === currentStateIndex) {
+                    stepClass += ' is-active';
+                }
+                const label = state.replace('_', ' ');
+                stepsHTML += `<div class="${stepClass}"><div class="node"></div><div class="label">${label}</div></div>`;
+            });
+
+            return `<div class="progress-bar">${stepsHTML}</div>`;
+        };
+
+        const renderTable = (deliveries) => {
+            tableBody.innerHTML = '';
+            if (!deliveries || deliveries.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No tienes entregas para gestionar.</td></tr>';
+                return;
+            }
+
+            deliveries.forEach(delivery => {
+                const clientName = delivery.cliente_nombre || 'N/A';
+                const formattedDate = new Date(delivery.fecha_estimada_entrega).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+                
+                const currentStateIndex = deliveryStates.indexOf(delivery.estado);
+                const isFinalState = finalStates.includes(delivery.estado);
+                let nextState = null;
+                let buttonText = 'Completado';
+
+                if (!isFinalState && currentStateIndex < deliveryStates.length - 1) {
+                    nextState = deliveryStates[currentStateIndex + 1];
+                    buttonText = `Marcar como ${nextState.replace('_', ' ')}`;
+                }
+
+                let actionButtonsHTML = `
+                    <button class="btn btn-update-status" 
+                            data-id="${delivery.id}" 
+                            data-next-state="${nextState || ''}" 
+                            ${isFinalState ? 'disabled' : ''}>
+                        ${buttonText}
+                    </button>
+                    <a href="#" class="btn btn-details" data-delivery-id="${delivery.id}">Ver Detalles</a>
+                `;
+
+                if (delivery.estado === 'INCIDENCIA') {
+                    actionButtonsHTML += `<button class="btn btn-reschedule" data-id="${delivery.id}">Reprogramar</button>`;
+                }
+
+                const row = `
+                    <tr id="entrega-row-${delivery.id}">
+                        <td>${delivery.id}</td>
+                        <td>${delivery.contrato_id}</td>
+                        <td>${clientName}</td>
+                        <td>${formattedDate}</td>
+                        <td>${createProgressBarHTML(delivery.estado)}</td>
+                        <td>${actionButtonsHTML}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        };
+
+        const handleUpdateState = async (deliveryId, nextState) => {
+            if (!nextState) return;
+
+            const actionText = `marcar esta entrega como ${nextState.replace('_', ' ')}`;
+            if (!confirm(`¿Está seguro de que desea ${actionText}?`)) {
+                return;
+            }
+
+            try {
+                await authenticatedFetch(`${ENTREGAS_API_URL}/${deliveryId}/estado`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ estado: nextState })
+                });
+                alert('Estado de la entrega actualizado con éxito.');
+                fetchInitialData(); // Refresh data
+            } catch (error) {
+                alert(`Error al actualizar estado: ${error.message}`);
+            }
+        };
+
+        const handleReschedule = async (deliveryId) => {
+            if (!confirm('¿Está seguro de que desea reprogramar esta entrega? Esto la devolverá al estado EN PREPARACIÓN y aumentará la fecha de entrega en 1 día.')) {
+                return;
+            }
+
+            try {
+                await authenticatedFetch(`${ENTREGAS_API_URL}/${deliveryId}/reprogramar`, {
+                    method: 'PATCH'
+                });
+                alert('Entrega reprogramada con éxito.');
+                fetchInitialData(); // Refresh data
+            } catch (error) {
+                alert(`Error al reprogramar la entrega: ${error.message}`);
+            }
+        };
+
+        const openDetailsModal = async (deliveryId) => {
+            modalBody.innerHTML = '<p style="text-align:center;">Cargando detalles...</p>';
+            modal.style.display = 'flex';
+
+            try {
+                const deliveryRes = await authenticatedFetch(`${ENTREGAS_API_URL}/${deliveryId}`);
+                const delivery = await deliveryRes.json();
+                const { contrato_id, orden_de_pago_id } = delivery;
+
+                let contract, paymentOrder;
+                const [contractRes, paymentOrderRes] = await Promise.all([
+                    authenticatedFetch(`${CONTRATOS_API_URL}/traerContratoPorId/${contrato_id}`),
+                    authenticatedFetch(`${PAGOS_API_URL}/transaccionesPorOrden/${orden_de_pago_id}`)
+                ]);
+                [contract, paymentOrder] = await Promise.all([contractRes.json(), paymentOrderRes.json()]);
+
+                const currentUser = JSON.parse(localStorage.getItem('usuario'));
+
+                let productsTableHTML = '<p>No hay productos en este contrato.</p>';
+                if (contract.productos && contract.productos.length > 0) {
+                    const productRows = await Promise.all(contract.productos.map(async (p) => {
+                        const productDetailsRes = await authenticatedFetch(`${PRODUCTS_API_URL}/buscarPorId/${p.producto_id_original}`);
+                        const productDetails = await productDetailsRes.json();
+                        const productName = productDetails ? productDetails.nombre : 'Producto no encontrado';
+                        const productUnit = productDetails ? productDetails.unidad : 'N/A';
+                        return `
+                            <tr>
+                                <td>${productName}</td>
+                                <td>${productUnit}</td>
+                                <td>${p.cantidad}</td>
+                                <td>${formatCurrency(p.precio_unitario)}</td>
+                                <td>${formatCurrency(p.sub_total)}</td>
+                            </tr>
+                        `;
+                    }));
+                    productsTableHTML = `
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>Producto</th><th>Presentación</th><th>Cantidad</th><th>Precio Unit.</th><th>Subtotal</th></tr></thead>
+                                <tbody>${productRows.join('')}</tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+
+                modalBody.innerHTML = `
+                    <div class="details-grid">
+                        <div class="detail-section">
+                            <h3>Detalles de Entrega</h3>
+                            <p><strong>ID Entrega:</strong> ${delivery.id}</p>
+                            <p><strong>Estado:</strong> ${formatUnderscores(delivery.estado)}</p>
+                            <p><strong>Dirección:</strong> ${delivery.direccion_entrega || 'N/A'}</p>
+                            <p><strong>Teléfono Contacto:</strong> ${delivery.telefono_contacto || 'N/A'}</p>
+                            <p><strong>Fecha Creación:</strong> ${formatDate(delivery.fecha_creacion)}</p>
+                            <p><strong>Fecha Estimada:</strong> ${formatDate(delivery.fecha_estimada_entrega)}</p>
+                            <p><strong>Fecha Entrega Real:</strong> ${formatDate(delivery.fecha_entrega_real)}</p>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Resumen del Contrato</h3>
+                            <p><strong># Radicado:</strong> ${contract.id}</p>
+                            <p><strong>Cliente:</strong> ${userMap.get(contract.cliente_id) || 'N/A'}</p>
+                            <p><strong>Proveedor:</strong> ${userMap.get(currentUser.id) || currentUser.username}</p>
+                            <p><strong>Fecha Contrato:</strong> ${formatDate(contract.fecha_creacion)}</p>
+                            <p><strong>Monto Total Contrato:</strong> ${formatCurrency(contract.total)}</p>
+                            <p><strong>Estado Contrato:</strong> ${formatUnderscores(contract.estado)}</p>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Resumen de Pago</h3>
+                            <p><strong>ID Orden de Pago:</strong> ${paymentOrder.id}</p>
+                            <p><strong>Estado del Pago:</strong> ${formatUnderscores(paymentOrder.estado)}</p>
+                            <p><strong>Monto Total:</strong> ${formatCurrency(paymentOrder.monto_total)}</p>
+                            <p><strong>Saldo Pendiente:</strong> ${formatCurrency(paymentOrder.saldo_pendiente)}</p>
+                            <p><strong>Total Transacciones:</strong> ${paymentOrder.transacciones ? paymentOrder.transacciones.length : 0}</p>
+                        </div>
+                    </div>
+                    <div class="detail-section" style="margin-top: 2rem;">
+                        <h3>Productos del Contrato</h3>
+                        ${productsTableHTML}
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error fetching consolidated details:', error);
+                modalBody.innerHTML = `<p style="text-align:center; color:var(--error-color);">Error al cargar los detalles: ${error.message}</p>`;
+            }
+        };
+
+        const handleHighlighting = () => {
+            if (window.location.hash && window.location.hash.startsWith('#entrega-')) {
+                const deliveryId = window.location.hash.substring(9); // length of '#entrega-'
+                const row = document.getElementById(`entrega-row-${deliveryId}`);
+                if (row) {
+                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    row.classList.add('highlight');
+                }
+            }
+        };
+
+        const fetchInitialData = async () => {
+            try {
+                const currentUser = JSON.parse(localStorage.getItem('usuario'));
+                const deliveriesRes = await authenticatedFetch(ENTREGAS_API_URL);
+                const deliveries = await deliveriesRes.json();
+
+                const clientIds = deliveries.map(d => d.cliente_id);
+                const userIdsToFetch = [...new Set([currentUser.id, ...clientIds].filter(id => id))];
+
+                if (userIdsToFetch.length > 0) {
+                    const usersRes = await Promise.all(
+                        userIdsToFetch.map(id => authenticatedFetch(`${USERS_API_URL}/buscarUsuario/${id}`))
+                    );
+                    const users = await Promise.all(usersRes.map(res => res.json()));
+                    userMap = new Map(users.map(user => [user.id, user.nombre]));
+
+                    const enrichedDeliveries = deliveries.map(delivery => ({
+                        ...delivery,
+                        cliente_nombre: userMap.get(delivery.cliente_id) || 'Cliente no encontrado'
+                    }));
+                    renderTable(enrichedDeliveries);
+                } else {
+                    renderTable(deliveries);
+                }
+                
+                handleHighlighting();
+            } catch (error) {
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--error-color);">Error al cargar los datos: ${error.message}</td></tr>`;
+            }
+        };
+
+        tableBody.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (e.target.classList.contains('btn-update-status')) {
+                const { id, nextState } = e.target.dataset;
+                if (id && nextState) {
+                    handleUpdateState(id, nextState);
+                }
+            } else if (e.target.classList.contains('btn-details')) {
+                const deliveryId = e.target.dataset.deliveryId;
+                openDetailsModal(deliveryId);
+            } else if (e.target.classList.contains('btn-reschedule')) {
+                const deliveryId = e.target.dataset.id;
+                handleReschedule(deliveryId);
+            }
+        });
+
+        closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+        window.addEventListener('click', (e) => {
+            if (e.target == modal) modal.style.display = 'none';
+        });
+
+        document.addEventListener('DOMContentLoaded', fetchInitialData);
+
+    </script>
+
+</body>
+</html>

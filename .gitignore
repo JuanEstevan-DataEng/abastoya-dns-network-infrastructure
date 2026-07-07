@@ -1,0 +1,17 @@
+# Node
+**/node_modules/
+node_modules/
+
+# Vagrant machine state
+.vagrant/
+
+# MySQL Workbench binary models
+*.mwb
+
+# Office document exports
+*.docx
+
+# Env / OS
+.env
+.DS_Store
+Thumbs.db

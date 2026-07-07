@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Pagos - Abasto Ya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #2C5F2D;
+            --secondary-color: #97BC62;
+            --accent-color: #F9A03F;
+            --background-color: #F4F1DE;
+            --text-color: #3E2723;
+            --white-color: #FFFFFF;
+            --error-color: #D32F2F;
+        }
+
+        body { margin: 0; font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--text-color); }
+        .header { background-color: var(--primary-color); color: var(--white-color); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .header h1 { margin: 0; font-size: 1.8rem; }
+        .header a { color: var(--white-color); text-decoration: none; font-weight: 600; }
+        .main-container { padding: 2rem; }
+        .section-title { font-size: 1.8rem; font-weight: 700; color: var(--primary-color); margin-bottom: 1.5rem; border-bottom: 3px solid var(--secondary-color); padding-bottom: 0.5rem; }
+        .table-container { background-color: var(--white-color); border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem 1.2rem; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f7f7f7; font-weight: 700; color: var(--primary-color); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #f1f1f1; }
+
+        .actions-btn { background-color: var(--secondary-color); color: white; padding: 0.5rem 1rem; border-radius: 5px; text-decoration: none; font-weight: 600; transition: background-color 0.3s; border: none; cursor: pointer; margin-right: 0.5rem; }
+        .actions-btn:hover { background-color: #7BA04F; }
+        .pay-btn { background-color: var(--accent-color); }
+        .pay-btn:hover { background-color: #E08A2E; }
+        .actions-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+        .modal-content { background-color: #fefefe; margin: auto; padding: 2rem 2.5rem; border-radius: 15px; width: 90%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+        .modal-header h2 { margin: 0; color: var(--primary-color); }
+        .close-button { color: #aaa; font-size: 2rem; font-weight: bold; cursor: pointer; }
+        .close-button:hover, .close-button:focus { color: black; }
+        
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        .form-group input { width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+        .form-group input[disabled] { background-color: #e9ecef; }
+        .form-group .btn-primary { width: 100%; padding: 1rem; border: none; border-radius: 10px; font-size: 1.2rem; font-weight: 600; cursor: pointer; background-color: var(--primary-color); color: white; }
+        .payment-summary { font-size: 1.1rem; margin-bottom: 1.5rem; }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Mis Pagos</h1>
+        <a href="dashboard-cliente.html">Volver al Panel</a>
+    </header>
+
+    <main class="main-container">
+        <h2 class="section-title">Mis Órdenes de Pago</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Orden</th>
+                        <th># Radicado Contrato</th>
+                        <th>Proveedor</th>
+                        <th>Monto Total</th>
+                        <th>Saldo Pendiente</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="payment-orders-table-body"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal para Historial de Pagos -->
+    <div id="history-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="history-modal-title">Historial de Pagos</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div id="history-modal-body" class="table-container">
+                <table>
+                    <thead><tr><th>ID Transacción</th><th>Monto Pagado</th><th>Fecha</th><th>Método</th><th>Referencia</th></tr></thead>
+                    <tbody id="history-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Realizar Pago -->
+    <div id="payment-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 id="payment-modal-title">Realizar un Pago</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <form id="payment-form">
+                <input type="hidden" id="payment-order-id">
+                <div class="payment-summary">
+                    <p><strong>Proveedor:</strong> <span id="payment-provider-name"></span></p>
+                    <p><strong>Saldo Pendiente:</strong> <span id="payment-pending-amount"></span></p>
+                </div>
+                <div class="form-group">
+                    <label for="payment-amount">Monto a Pagar</label>
+                    <input type="number" id="payment-amount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="payment-reference">Referencia de Pago</label>
+                    <input type="text" id="payment-reference" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn-primary">Confirmar Pago</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const PAGOS_API_URL = 'http://192.168.100.2:3004/pagos';
+
+        const tableBody = document.getElementById('payment-orders-table-body');
+        const historyModal = document.getElementById('history-modal');
+        const paymentModal = document.getElementById('payment-modal');
+        const historyTableBody = document.getElementById('history-table-body');
+        const paymentForm = document.getElementById('payment-form');
+
+        let allPaymentOrders = [];
+
+        const formatCurrency = (value) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+        const formatDate = (dateString) => new Date(dateString).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+        const formatUnderscores = (text) => text ? text.replace(/_/g, ' ') : 'N/A';
+
+        const authenticatedFetch = async (url, options = {}) => {
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = 'login.html'; return; }
+            const headers = { 'Content-Type': 'application/json', ...options.headers, 'Authorization': `Bearer ${token}` };
+            const response = await fetch(url, { ...options, headers });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                if (response.status === 401 || response.status === 403) { alert('Su sesión ha expirado o no tiene permisos.'); window.location.href = 'login.html'; }
+                throw new Error(errorData.message || `Error ${response.status}`);
+            }
+            return response;
+        };
+
+        const renderTable = (paymentOrders) => {
+            tableBody.innerHTML = '';
+            if (paymentOrders.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No se encontraron órdenes de pago.</td></tr>';
+                return;
+            }
+            paymentOrders.forEach(order => {
+                const isPayable = order.estado === 'PENDIENTE';
+                const row = `
+                    <tr>
+                        <td>${order.id}</td>
+                        <td>${order.contrato_id}</td>
+                        <td>${order.proveedor_nombre || 'N/A'}</td>
+                        <td>${formatCurrency(order.monto_total)}</td>
+                        <td>${formatCurrency(order.saldo_pendiente)}</td>
+                        <td>${formatUnderscores(order.estado)}</td>
+                        <td>
+                            <button class="actions-btn" data-order-id="${order.id}" data-action="history">Ver Historial</button>
+                            <button class="actions-btn pay-btn" data-order-id="${order.id}" data-action="pay" ${!isPayable ? 'disabled' : ''}>Realizar Pago</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        };
+
+        const openHistoryModal = async (orderId) => {
+            document.getElementById('history-modal-title').textContent = `Historial de Pagos - Orden #${orderId}`;
+            historyTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando...</td></tr>';
+            historyModal.style.display = 'flex';
+            try {
+                const res = await authenticatedFetch(`${PAGOS_API_URL}/transaccionesPorOrden/${orderId}`);
+                const orderDetails = await res.json();
+                const transactions = orderDetails.transacciones || [];
+                historyTableBody.innerHTML = '';
+                if (transactions.length === 0) {
+                    historyTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay transacciones para esta orden.</td></tr>';
+                    return;
+                }
+                transactions.forEach(tx => {
+                    historyTableBody.innerHTML += `
+                        <tr>
+                            <td>${tx.id}</td>
+                            <td>${formatCurrency(tx.monto)}</td>
+                            <td>${formatDate(tx.fecha_transaccion)}</td>
+                            <td>${formatUnderscores(tx.metodo_pago)}</td>
+                            <td>${tx.id_referencia_externa || 'N/A'}</td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                historyTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--error-color);">${error.message}</td></tr>`;
+            }
+        };
+
+        const openPaymentModal = (orderId) => {
+            const order = allPaymentOrders.find(o => o.id == orderId);
+            if (!order) return;
+            document.getElementById('payment-modal-title').textContent = `Pagar Orden #${order.id}`;
+            document.getElementById('payment-order-id').value = order.id;
+            document.getElementById('payment-provider-name').textContent = order.proveedor_nombre;
+            document.getElementById('payment-pending-amount').textContent = formatCurrency(order.saldo_pendiente);
+            const amountInput = document.getElementById('payment-amount');
+            amountInput.value = order.saldo_pendiente.toFixed(2);
+            amountInput.max = order.saldo_pendiente.toFixed(2);
+            amountInput.min = 1;
+            paymentModal.style.display = 'flex';
+        };
+
+        const handlePaymentSubmit = async (e) => {
+            e.preventDefault();
+            const orderId = document.getElementById('payment-order-id').value;
+            const amount = parseFloat(document.getElementById('payment-amount').value);
+            const reference = document.getElementById('payment-reference').value.trim();
+            const order = allPaymentOrders.find(o => o.id == orderId);
+
+            if (!reference) {
+                alert('Por favor, ingrese una referencia de pago.');
+                return;
+            }
+
+            if (isNaN(amount) || amount <= 0 || amount > order.saldo_pendiente) {
+                alert('Por favor, ingrese un monto válido que no exceda el saldo pendiente.');
+                return;
+            }
+
+            const paymentData = {
+                monto: amount,
+                metodo_pago: 'TARJETA_DE_CREDITO_SIMULADA',
+                id_referencia_externa: reference
+            };
+
+            try {
+                await authenticatedFetch(`${PAGOS_API_URL}/pagarOrden/${orderId}/transacciones`, { method: 'POST', body: JSON.stringify(paymentData) });
+                alert('¡Pago realizado con éxito!');
+                paymentModal.style.display = 'none';
+                fetchInitialData(); // Refresh data
+            } catch (error) {
+                alert(`Error al procesar el pago: ${error.message}`);
+            }
+        };
+
+        const fetchInitialData = async () => {
+            try {
+                const USERS_API_URL = 'http://192.168.100.2:3001/usuarios';
+                const ordersResponse = await authenticatedFetch(`${PAGOS_API_URL}/mostrarOrdenes`);
+                const orders = await ordersResponse.json();
+
+                // Get unique provider IDs from orders
+                const providerIds = [...new Set(orders.map(o => o.proveedor_id).filter(id => id))];
+
+                if (providerIds.length > 0) {
+                    // Fetch user profiles for those providers
+                    const usersResponse = await Promise.all(
+                        providerIds.map(id => authenticatedFetch(`${USERS_API_URL}/buscarUsuario/${id}`))
+                    );
+                    const users = await Promise.all(usersResponse.map(res => res.json()));
+                    const userMap = new Map(users.map(user => [user.id, user.nombre]));
+
+                    // Enrich order data
+                    allPaymentOrders = orders.map(order => ({
+                        ...order,
+                        proveedor_nombre: userMap.get(order.proveedor_id) || 'Proveedor no encontrado'
+                    }));
+                } else {
+                    allPaymentOrders = orders;
+                }
+
+                renderTable(allPaymentOrders);
+            } catch (error) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--error-color);">${error.message}</td></tr>`;
+            }
+        };
+
+        // --- Event Listeners ---
+        tableBody.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const { orderId, action } = e.target.dataset;
+                if (action === 'history') openHistoryModal(orderId);
+                else if (action === 'pay') openPaymentModal(orderId);
+            }
+        });
+
+        historyModal.querySelector('.close-button').addEventListener('click', () => historyModal.style.display = 'none');
+        paymentModal.querySelector('.close-button').addEventListener('click', () => paymentModal.style.display = 'none');
+        window.addEventListener('click', (e) => {
+            if (e.target == historyModal) historyModal.style.display = 'none';
+            if (e.target == paymentModal) paymentModal.style.display = 'none';
+        });
+        paymentForm.addEventListener('submit', handlePaymentSubmit);
+
+        document.addEventListener('DOMContentLoaded', fetchInitialData);
+
+    </script>
+</body>
+</html>

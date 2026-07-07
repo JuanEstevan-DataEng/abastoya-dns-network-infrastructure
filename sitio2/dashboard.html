@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Abasto Ya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #2C5F2D;
+            --background-color: #F4F1DE;
+            --text-color: #3E2723;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .navbar {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .navbar button {
+            background-color: #F9A03F;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .container {
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <nav class="navbar">
+            <h1>Abasto Ya - Dashboard</h1>
+            <button id="logoutBtn">Cerrar Sesión</button>
+        </nav>
+
+        <main class="container">
+            <h2>Bienvenido</h2>
+            <p>Esta es tu página principal. Desde aquí podrás gestionar tus productos, pedidos y más.</p>
+            <pre id="token-payload"></pre>
+        </main>
+    </div>
+
+    <script>
+        // 1. Verificar autenticación al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('jwt_token');
+
+            if (!token) {
+                // Si no hay token, redirigir al login
+                window.location.href = 'login.html';
+                return; // Detener la ejecución del script
+            }
+
+            // 2. Decodificar y mostrar el payload del token (solo para depuración)
+            try {
+                const payloadBase64 = token.split('.')[1];
+                const decodedPayload = JSON.parse(atob(payloadBase64));
+                document.getElementById('token-payload').textContent = 
+                    `Hola, ${decodedPayload.username} (Rol: ${decodedPayload.tipo})\nTu sesión expira en: ${new Date(decodedPayload.exp * 1000).toLocaleTimeString()}`;
+            } catch (e) {
+                console.error('Error al decodificar el token:', e);
+                // Si el token es inválido, limpiar y redirigir
+                localStorage.removeItem('jwt_token');
+                window.location.href = 'login.html';
+            }
+        });
+
+        // 3. Manejar el cierre de sesión
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('jwt_token');
+            alert('Has cerrado la sesión.');
+            window.location.href = 'index.html';
+        });
+    </script>
+
+</body>
+</html>

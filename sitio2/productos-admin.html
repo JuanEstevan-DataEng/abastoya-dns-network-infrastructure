@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Productos - Abasto Ya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #2C5F2D; /* Verde oscuro */
+            --secondary-color: #97BC62; /* Verde claro */
+            --background-color: #F4F1DE; /* Beige claro */
+            --text-color: #3E2723; /* Marrón oscuro */
+            --white-color: #FFFFFF;
+            --error-color: #D32F2F;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .header a {
+            color: var(--white-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.3s;
+        }
+
+        .header a:hover {
+            opacity: 0.8;
+        }
+
+        .main-container {
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .toolbar input, .toolbar select {
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .toolbar input {
+            width: 300px;
+        }
+
+        .toolbar select {
+            width: 350px;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #1A4314;
+        }
+
+        .table-container {
+            background-color: var(--white-color);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            overflow-x: auto; /* Para responsividad en tablas */
+        }
+
+        .provider-offers-section .table-container {
+            margin-bottom: 3rem; /* Espacio solo para esta sección */
+        }
+
+        .boletin-scroll-area {
+            max-height: 65vh; /* Altura máxima para el área de scroll */
+            overflow-y: auto; /* Scroll vertical */
+            margin-bottom: 2rem; /* Espacio antes de la siguiente sección */
+            border-radius: 15px;
+            /* Opcional: un borde sutil */
+            border: 1px solid #e0e0e0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f7f7f7;
+            font-weight: 700;
+            color: var(--primary-color);
+            position: sticky; /* Encabezados fijos */
+            top: 0; /* Pegar al tope del contenedor de scroll */
+            z-index: 10;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .actions a {
+            color: var(--primary-color);
+            margin-right: 1rem;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .actions a:hover {
+            text-decoration: underline;
+        }
+
+        /* Estilos para el Modal */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 2rem 2.5rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 700px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .close-button {
+            color: #aaa;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover, .close-button:focus {
+            color: black;
+        }
+
+        #product-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        #product-form .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #product-form .full-width {
+            grid-column: 1 / -1;
+        }
+
+        #product-form label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        #product-form input, #product-form select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem 0;
+            margin-top: 1.5rem;
+            position: sticky; /* Paginación fija */
+            bottom: 0;
+            background-color: var(--white-color);
+            border-top: 1px solid #ddd;
+        }
+
+        .pagination-btn {
+            background-color: var(--white-color);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            margin: 0 0.3rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .pagination-btn:hover, .pagination-btn.active {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #category-filter {
+            width: 250px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Gestión de Productos</h1>
+        <a href="dashboard-admin.html">Volver al Panel</a>
+    </header>
+
+    <main class="main-container">
+        <!-- Sección del Boletín de Coroabasto -->
+        <h2 class="section-title">Boletín de Coroabasto</h2>
+        <div class="toolbar">
+            <input type="text" id="search-input" placeholder="Buscar en el boletín...">
+            <select id="category-filter"><option value="">Todas las categorías</option></select>
+            <button class="btn btn-primary" id="add-product-btn">+ Añadir al Boletín</button>
+        </div>
+        <div class="boletin-scroll-area">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Presentación</th>
+                            <th>Categoría</th>
+                            <th>Precio Extra</th>
+                            <th>Precio Primera</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bulletin-table-body">
+                        <!-- Filas del boletín -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="pagination-container" class="pagination-container"></div>
+        </div>
+
+        <!-- Sección de Productos por Proveedor -->
+        <div class="provider-offers-section">
+            <h2 class="section-title">Ofertas por Proveedor</h2>
+            <div class="toolbar">
+                <select id="provider-select">
+                    <option value="">Seleccione un proveedor...</option>
+                </select>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Unidad</th>
+                            <th>Precio Oferta</th>
+                            <th>Precio Unit.</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="provider-offers-table-body">
+                         <!-- Filas de ofertas del proveedor -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal para Añadir/Editar Producto del Boletín -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Añadir Nuevo Producto</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <form id="product-form">
+                <input type="hidden" id="product-id">
+                <div class="form-group">
+                    <label for="nombre">Nombre del Producto</label>
+                    <input type="text" id="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="categoria">Categoría</label>
+                    <select id="categoria" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="presentacion">Presentación</label>
+                    <input type="text" id="presentacion" placeholder="Ej: Bulto, Caja, Canastilla">
+                </div>
+                <div class="form-group">
+                    <label for="cantidad">Cantidad (en la presentación)</label>
+                    <input type="number" id="cantidad" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="unidad_de_medida">Unidad de Medida</label>
+                    <input type="text" id="unidad_de_medida" placeholder="Ej: kg, lb, unidad">
+                </div>
+                <div class="form-group">
+                    <label for="precio_con_calidad_extra">Precio Calidad Extra</label>
+                    <input type="number" id="precio_con_calidad_extra" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="precio_por_unidad">Precio por Unidad (auto)</label>
+                    <input type="number" id="precio_por_unidad" step="0.01" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="precio_con_calidad_primera">Precio Calidad Primera</label>
+                    <input type="number" id="precio_con_calidad_primera" step="0.01" required>
+                </div>
+                <div class="form-group full-width">
+                    <button type="submit" class="btn btn-primary">Guardar Producto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const PRODUCTS_API_URL = 'http://192.168.100.2:3002/productos';
+        const USERS_API_URL = 'http://192.168.100.2:3001/usuarios';
+
+        // --- DOM Elements ---
+        const bulletinTableBody = document.getElementById('bulletin-table-body');
+        const searchInput = document.getElementById('search-input');
+        const categoryFilter = document.getElementById('category-filter');
+        const paginationContainer = document.getElementById('pagination-container');
+        const addProductBtn = document.getElementById('add-product-btn');
+        const modal = document.getElementById('product-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const closeButton = document.querySelector('.close-button');
+        const productForm = document.getElementById('product-form');
+        const productIdInput = document.getElementById('product-id');
+        const providerSelect = document.getElementById('provider-select');
+        const providerOffersTableBody = document.getElementById('provider-offers-table-body');
+        // Modal form fields
+        const modalCategorySelect = document.getElementById('categoria');
+        const modalCantidadInput = document.getElementById('cantidad');
+        const modalPrecioExtraInput = document.getElementById('precio_con_calidad_extra');
+        const modalPrecioUnitarioInput = document.getElementById('precio_por_unidad');
+
+        let allBulletinProducts = [];
+        let allProviderOffers = [];
+        let uniqueCategories = [];
+        
+        let currentPage = 1;
+        const rowsPerPage = 30;
+
+        // --- Helper for Number Formatting ---
+        const formatNumberWithLocale = (value) => {
+            if (typeof value !== 'number') return value;
+            return new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+        };
+
+        // --- Helper for Underscore Formatting ---
+        const formatUnderscoresToSpaces = (text) => {
+            if (typeof text !== 'string') return text;
+            return text.replace(/_/g, ' ');
+        };
+
+        const authenticatedFetch = async (url, options = {}) => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            const headers = { ...options.headers, 'Authorization': `Bearer ${token}` };
+            const response = await fetch(url, { ...options, headers });
+
+            if (!response.ok) {
+                let errorData = { message: `Error ${response.status}: ${response.statusText}` };
+                try {
+                    const jsonResponse = await response.json();
+                    errorData = { ...errorData, ...jsonResponse };
+                } catch (e) {
+                    // No se pudo parsear el JSON, usar el mensaje por defecto
+                }
+
+                if (response.status === 401 || response.status === 403) {
+                    alert('Su sesión ha expirado o no tiene permisos. Por favor, inicie sesión de nuevo.');
+                    window.location.href = 'login.html';
+                    throw new Error('Unauthorized');
+                }
+                // Priorizar el mensaje del backend, luego el error del backend, luego el estado HTTP genérico
+                const finalErrorMessage = errorData.message || errorData.error || `Error ${response.status}: ${response.statusText}`;
+                throw new Error(finalErrorMessage);
+            }
+            return response;
+        };
+
+        const renderBulletinTable = (products) => {
+            bulletinTableBody.innerHTML = '';
+            if (products.length === 0) {
+                bulletinTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No se encontraron productos con los filtros actuales.</td></tr>';
+                return;
+            }
+            products.forEach(product => {
+                const row = `
+                    <tr>
+                        <td>${formatUnderscoresToSpaces(product.nombre)}</td>
+                        <td>${formatUnderscoresToSpaces(product.presentacion)}</td>
+                        <td>${formatUnderscoresToSpaces(product.categoria)}</td>
+                        <td>$${formatNumberWithLocale(product.precio_con_calidad_extra)}</td>
+                        <td>$${formatNumberWithLocale(product.precio_con_calidad_primera)}</td>
+                        <td class="actions">
+                            <a href="#" class="edit-btn" data-id="${product.id}">Editar</a>
+                        </td>
+                    </tr>
+                `;
+                bulletinTableBody.innerHTML += row;
+            });
+        };
+
+        const renderProviderOffersTable = (offers) => {
+            providerOffersTableBody.innerHTML = '';
+            if (offers.length === 0) {
+                providerOffersTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Este proveedor no tiene ofertas activas.</td></tr>';
+                return;
+            }
+            offers.forEach(offer => {
+                const row = `
+                    <tr>
+                        <td>${formatUnderscoresToSpaces(offer.nombre)}</td>
+                        <td>${formatUnderscoresToSpaces(offer.unidad)}</td>
+                        <td>$${formatNumberWithLocale(offer.precio)}</td>
+                        <td>$${formatNumberWithLocale(offer.precio_unitario)}</td>
+                        <td>${formatUnderscoresToSpaces(offer.estado || 'ACTIVO')}</td>
+                    </tr>
+                `;
+                providerOffersTableBody.innerHTML += row;
+            });
+        };
+
+        const renderPagination = (totalItems) => {
+            paginationContainer.innerHTML = '';
+            const totalPages = Math.ceil(totalItems / rowsPerPage);
+            if (totalPages <= 1) return;
+
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = '&laquo; Anterior';
+            prevButton.className = 'pagination-btn';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    applyFiltersAndPagination();
+                }
+            });
+            paginationContainer.appendChild(prevButton);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.innerText = i;
+                pageButton.className = 'pagination-btn';
+                if (i === currentPage) pageButton.classList.add('active');
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    applyFiltersAndPagination();
+                });
+                paginationContainer.appendChild(pageButton);
+            }
+
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = 'Siguiente &raquo;';
+            nextButton.className = 'pagination-btn';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    applyFiltersAndPagination();
+                }
+            });
+            paginationContainer.appendChild(nextButton);
+        };
+
+        const applyFiltersAndPagination = () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedCategory = categoryFilter.value;
+            let filteredProducts = allBulletinProducts;
+            if (searchTerm) filteredProducts = filteredProducts.filter(p => p.nombre.toLowerCase().includes(searchTerm));
+            if (selectedCategory) filteredProducts = filteredProducts.filter(p => p.categoria === selectedCategory);
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+            renderBulletinTable(paginatedProducts);
+            renderPagination(filteredProducts.length);
+        };
+        
+        const populateCategoryFilter = () => {
+            uniqueCategories = [...new Set(allBulletinProducts.map(p => p.categoria).filter(Boolean))].sort();
+            categoryFilter.innerHTML = '<option value="">Todas las categorías</option>';
+            uniqueCategories.forEach(category => {
+                categoryFilter.innerHTML += `<option value="${category}">${formatUnderscoresToSpaces(category)}</option>`;
+            });
+        };
+
+        const fetchBulletinProducts = async () => {
+            try {
+                const response = await authenticatedFetch(`${PRODUCTS_API_URL}/traerProductosCoroabasto`);
+                if (!response.ok) throw new Error('Error al cargar los productos del boletín.');
+                allBulletinProducts = await response.json();
+                populateCategoryFilter();
+                applyFiltersAndPagination();
+            } catch (error) {
+                if (error.message !== 'Unauthorized') {
+                    bulletinTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--error-color);">${error.message}</td></tr>`;
+                }
+            }
+        };
+
+        const fetchProviders = async () => {
+            try {
+                const response = await authenticatedFetch(`${USERS_API_URL}/verUsuarios`);
+                if (!response.ok) throw new Error('Error al cargar los proveedores.');
+                const users = await response.json();
+                const providers = users.filter(user => user.tipo === 'PROVEEDOR');
+                providerSelect.innerHTML = '<option value="">Seleccione un proveedor...</option>';
+                providers.forEach(provider => {
+                    providerSelect.innerHTML += `<option value="${provider.id}">${provider.nombre}</option>`;
+                });
+            } catch (error) {
+                console.error('Error fetching providers:', error);
+            }
+        };
+
+        const fetchProviderOffers = async () => {
+            try {
+                const response = await authenticatedFetch(`${PRODUCTS_API_URL}/traerTodos`);
+                if (!response.ok) throw new Error('Error al cargar las ofertas de productos.');
+                allProviderOffers = await response.json();
+            } catch (error) {
+                console.error('Error fetching provider offers:', error);
+            }
+        };
+
+        const calculateUnitPrice = () => {
+            const cantidad = parseFloat(modalCantidadInput.value);
+            const precioExtra = parseFloat(modalPrecioExtraInput.value);
+            if (cantidad > 0 && precioExtra > 0) {
+                modalPrecioUnitarioInput.value = (precioExtra / cantidad).toFixed(2);
+            } else {
+                modalPrecioUnitarioInput.value = '';
+            }
+        };
+
+        const populateModalCategories = (selectedCategory) => {
+            modalCategorySelect.innerHTML = '';
+            uniqueCategories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                if (category === selectedCategory) {
+                    option.selected = true;
+                }
+                modalCategorySelect.appendChild(option);
+            });
+        };
+
+        const openModal = (mode = 'add', product = null) => {
+            productForm.reset();
+            productIdInput.value = '';
+            populateModalCategories(product ? product.categoria : null);
+
+            if (mode === 'edit' && product) {
+                modalTitle.textContent = 'Editar Producto';
+                productIdInput.value = product.id;
+                document.getElementById('nombre').value = product.nombre;
+                document.getElementById('presentacion').value = product.presentacion;
+                modalCantidadInput.value = product.cantidad;
+                document.getElementById('unidad_de_medida').value = product.unidad_de_medida;
+                modalPrecioExtraInput.value = product.precio_con_calidad_extra;
+                document.getElementById('precio_con_calidad_primera').value = product.precio_con_calidad_primera;
+                calculateUnitPrice(); // Calcular al abrir
+            } else {
+                modalTitle.textContent = 'Añadir Nuevo Producto al Boletín';
+            }
+            modal.style.display = 'flex';
+        };
+
+        const closeModal = () => {
+            modal.style.display = 'none';
+        };
+
+        productForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const productData = {
+                nombre: document.getElementById('nombre').value,
+                categoria: modalCategorySelect.value,
+                presentacion: document.getElementById('presentacion').value,
+                cantidad: parseFloat(modalCantidadInput.value) || 0,
+                unidad_de_medida: document.getElementById('unidad_de_medida').value,
+                precio_con_calidad_primera: parseFloat(document.getElementById('precio_con_calidad_primera').value) || 0,
+                precio_con_calidad_extra: parseFloat(modalPrecioExtraInput.value) || 0,
+                precio_por_unidad: parseFloat(document.getElementById('precio_por_unidad').value) || 0,
+            };
+
+            const id = productIdInput.value;
+            const isEditing = !!id;
+            const url = isEditing ? `${PRODUCTS_API_URL}/coroabasto/${id}` : `${PRODUCTS_API_URL}/coroabastoCrearProducto`;
+            const method = isEditing ? 'PATCH' : 'POST';
+
+            try {
+                const response = await authenticatedFetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productData)
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    const errorMessage = result.message || 'Ocurrió un error.';
+                    const errorDetails = result.error || 'No hay detalles adicionales.';
+                    throw new Error(`${errorMessage}. Detalles: ${errorDetails}`);
+                }
+                alert(`Producto ${isEditing ? 'actualizado' : 'creado'} con éxito.`);
+                closeModal();
+                fetchBulletinProducts();
+            } catch (error) {
+                    if (error.message !== 'Unauthorized') alert(`Error: ${error.message}`);
+            }
+        });
+
+        addProductBtn.addEventListener('click', () => openModal('add'));
+        closeButton.addEventListener('click', closeModal);
+        window.addEventListener('click', (event) => {
+            if (event.target == modal) closeModal();
+        });
+
+        searchInput.addEventListener('input', () => {
+            currentPage = 1;
+            applyFiltersAndPagination();
+        });
+        
+        categoryFilter.addEventListener('change', () => {
+            currentPage = 1;
+            applyFiltersAndPagination();
+        });
+        
+        bulletinTableBody.addEventListener('click', (e) => {
+            if (e.target.classList.contains('edit-btn')) {
+                e.preventDefault();
+                const id = e.target.dataset.id;
+                const productToEdit = allBulletinProducts.find(p => p.id == id);
+                if (productToEdit) openModal('edit', productToEdit);
+            }
+        });
+
+        providerSelect.addEventListener('change', (e) => {
+            const providerId = e.target.value;
+            if (!providerId) {
+                renderProviderOffersTable([]);
+                return;
+            }
+            const filteredOffers = allProviderOffers.filter(offer => offer.proveedor_id == providerId);
+            renderProviderOffersTable(filteredOffers);
+        });
+
+        modalCantidadInput.addEventListener('input', calculateUnitPrice);
+        modalPrecioExtraInput.addEventListener('input', calculateUnitPrice);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchBulletinProducts();
+            fetchProviders();
+            fetchProviderOffers();
+        });
+
+    </script>
+
+</body>
+</html>
